@@ -1,17 +1,17 @@
 {
   "expo": {
-    "name": "AutoCare",
-    "slug": "auto",
+    "name": "JagaCar",
+    "slug": "jagacar",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "autocare",
+    "scheme": "jagacar",
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon"
     },
     "android": {
-      "package": "com.autocare.app",
+      "package": "com.jagacar.app",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",

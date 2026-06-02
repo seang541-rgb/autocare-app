@@ -1,15 +1,15 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { Animated, Easing, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Brand, Gradients, Radius, Shadow } from '@/constants/brand';
 
 export default function Success() {
   const { id, price } = useLocalSearchParams<{ id: string; price: string }>();
-  const scale = useRef(new Animated.Value(0)).current;
-  const fade = useRef(new Animated.Value(0)).current;
+  const [scale] = useState(() => new Animated.Value(0));
+  const [fade] = useState(() => new Animated.Value(0));
 
   useEffect(() => {
     Animated.sequence([
@@ -22,7 +22,7 @@ export default function Success() {
     <LinearGradient colors={Gradients.hero} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.root}>
       <View style={styles.center}>
         <Animated.View style={{ transform: [{ scale }] }}>
-          <LinearGradient colors={Gradients.insure} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.circle}>
+          <LinearGradient colors={Gradients.brand} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.circle}>
             <Ionicons name="checkmark-sharp" size={68} color="#fff" />
           </LinearGradient>
         </Animated.View>
@@ -33,8 +33,8 @@ export default function Success() {
           <Text style={styles.amount}>RM {price}</Text>
 
           <View style={styles.tipCard}>
-            <Ionicons name="qr-code" size={20} color={Brand.primary} />
-            <Text style={styles.tipText}>到店向员工出示订单二维码即可洗车</Text>
+            <Ionicons name="logo-whatsapp" size={20} color="#25D366" />
+            <Text style={styles.tipText}>预约提醒、付款成功通知和二维码链接已模拟发送到 WhatsApp。</Text>
           </View>
         </Animated.View>
       </View>
@@ -62,8 +62,14 @@ const styles = StyleSheet.create({
   sub: { color: Brand.textOnDarkSub, fontSize: 14, marginTop: 8 },
   amount: { color: Brand.primary, fontSize: 32, fontWeight: '900', marginTop: 14 },
   tipCard: {
-    flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: 'rgba(255,255,255,0.1)',
-    paddingHorizontal: 16, paddingVertical: 12, borderRadius: Radius.md, marginTop: 28,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: Radius.md,
+    marginTop: 28,
   },
   tipText: { color: '#fff', fontSize: 12, flex: 1 },
   footer: { flexDirection: 'row', gap: 12, paddingHorizontal: 24, paddingBottom: 40 },

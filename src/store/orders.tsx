@@ -3,15 +3,17 @@ import { createContext, ReactNode, useContext, useMemo, useState } from 'react';
 import { orders as seedOrders, Order } from '@/constants/data';
 
 export type LiveOrder = Order & {
-  qrCode: string;     // 二维码内容（订单号+校验）
+  qrCode: string;
   createdAt: number;
 };
 
 type OrderStore = {
   list: LiveOrder[];
   addOrder: (o: Omit<Order, 'id' | 'status'>) => LiveOrder;
-  redeem: (id: string) => void;          // 核销（待到店 → 已完成）
-  reschedule: (id: string, date: string, time: string) => void; // 改期
+  redeem: (id: string) => void;
+  reschedule: (id: string, date: string, time: string) => void;
+  addReview: (id: string, rating: number, review: string) => void;
+  addComplaint: (id: string, complaint: string) => void;
   getById: (id: string) => LiveOrder | undefined;
 };
 
@@ -39,6 +41,10 @@ export function OrderProvider({ children }: { children: ReactNode }) {
         setList((prev) => prev.map((x) => (x.id === id ? { ...x, status: 'done' } : x))),
       reschedule: (id, date, time) =>
         setList((prev) => prev.map((x) => (x.id === id ? { ...x, date, time } : x))),
+      addReview: (id, rating, review) =>
+        setList((prev) => prev.map((x) => (x.id === id ? { ...x, rating, review } : x))),
+      addComplaint: (id, complaint) =>
+        setList((prev) => prev.map((x) => (x.id === id ? { ...x, complaint } : x))),
       getById: (id) => list.find((x) => x.id === id),
     }),
     [list],

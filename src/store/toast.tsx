@@ -9,22 +9,22 @@ const Ctx = createContext<ToastCtx>(() => {});
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [msg, setMsg] = useState<string | null>(null);
-  const opacity = useRef(new Animated.Value(0)).current;
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [opacity] = useState(() => new Animated.Value(0));
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const show = useCallback(
     (m: string) => {
       setMsg(m);
-      if (timer.current) clearTimeout(timer.current);
+      if (timerRef.current) clearTimeout(timerRef.current);
       Animated.timing(opacity, { toValue: 1, duration: 180, useNativeDriver: true }).start();
-      timer.current = setTimeout(() => {
+      timerRef.current = setTimeout(() => {
         Animated.timing(opacity, { toValue: 0, duration: 250, useNativeDriver: true }).start(() => setMsg(null));
       }, 1600);
     },
     [opacity],
   );
 
-  useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
+  useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
 
   return (
     <Ctx.Provider value={show}>

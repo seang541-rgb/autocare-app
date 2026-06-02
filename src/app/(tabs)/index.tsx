@@ -1,165 +1,166 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Badge, Card, GradIcon, SectionTitle, Stars } from '@/components/ui';
-import { Brand, Gradients, Radius, Shadow } from '@/constants/brand';
-import { outlets, profile, promos, services } from '@/constants/data';
+import { AppBrand, Brand, Gradients, Radius, Shadow } from '@/constants/brand';
+import { notifications, outlets, profile, promos, services } from '@/constants/data';
+import { useI18n } from '@/store/i18n';
 import { useToast } from '@/store/toast';
 
 export default function HomeScreen() {
   const [notifOpen, setNotifOpen] = useState(false);
   const toast = useToast();
-  const goWash = () => router.push({ pathname: '/service/[id]', params: { id: 'wash' } });
+  const { t } = useI18n();
+  const bestOutlet = useMemo(
+    () => [...outlets].sort((a, b) => Number(b.openNow) - Number(a.openNow) || a.waitMins - b.waitMins)[0],
+    [],
+  );
 
   return (
     <View style={styles.root}>
-      {/* 渐变英雄头部 */}
-      <LinearGradient colors={Gradients.hero} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.heroGrad}>
+      <View style={styles.header}>
         <SafeAreaView edges={['top']}>
-          <View style={styles.heroPad}>
-            <View style={styles.topBar}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.locLabel}>当前位置</Text>
-                <View style={styles.locRow}>
-                  <Ionicons name="location" size={14} color={Brand.primary} />
-                  <Text style={styles.locValue}>Kepong, Kuala Lumpur</Text>
-                  <Ionicons name="chevron-down" size={14} color={Brand.textOnDarkSub} />
-                </View>
-              </View>
-              <Pressable style={styles.bell} onPress={() => setNotifOpen(true)} hitSlop={8}>
-                <Ionicons name="notifications-outline" size={20} color="#fff" />
-                <View style={styles.dot} />
-              </Pressable>
+          <View style={styles.headerRow}>
+            <View style={styles.brandMark}>
+              <Ionicons name="car-sport" size={19} color="#fff" />
             </View>
-
-            <Text style={styles.hello}>嗨，{profile.name} 👋</Text>
-            <Text style={styles.subHello}>今天想为爱车做点什么？</Text>
-
-            <Pressable style={styles.search} onPress={() => toast('搜索功能开发中，敬请期待')}>
-              <Ionicons name="search" size={18} color={Brand.textSub} />
-              <Text style={styles.searchPh}>搜索服务、门店或套餐</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.brandName}>{AppBrand.name}</Text>
+              <View style={styles.locationRow}>
+                <Ionicons name="location" size={13} color={Brand.primary} />
+                <Text style={styles.locationText}>Kepong, Kuala Lumpur</Text>
+              </View>
+            </View>
+            <Pressable style={styles.iconButton} onPress={() => setNotifOpen(true)} hitSlop={8}>
+              <Ionicons name="notifications-outline" size={20} color={Brand.text} />
+              <View style={styles.dot} />
             </Pressable>
           </View>
         </SafeAreaView>
-      </LinearGradient>
+      </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
-        {/* 套餐卡（叠在英雄区下方，制造层次） */}
         <View style={styles.body}>
-          <LinearGradient colors={Gradients.brand} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.pkg}>
-            <View style={styles.pkgRow}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.pkgLabel}>我的套餐 · {profile.packageName}</Text>
-                <Text style={styles.pkgBig}>
-                  {profile.packageLeft}
-                  <Text style={styles.pkgBigSub}> / {profile.packageTotal} 次</Text>
-                </Text>
+          <Card style={styles.readyCard}>
+            <View style={styles.readyTop}>
+              <View>
+                <Text style={styles.eyebrow}>最快可预约</Text>
+                <Text style={styles.readyTitle}>{bestOutlet.name}</Text>
+                <Text style={styles.readyMeta}>{bestOutlet.area} · {bestOutlet.distanceKm}km · {bestOutlet.open}</Text>
               </View>
-              <View style={styles.pkgBadge}>
-                <Ionicons name="checkmark-circle" size={13} color="#fff" />
-                <Text style={styles.pkgBadgeText}>生效中</Text>
-              </View>
+              <Badge text={bestOutlet.openNow ? '营业中' : '休息中'} color={bestOutlet.openNow ? Brand.success : Brand.textSub} soft={bestOutlet.openNow ? Brand.successSoft : Brand.border} />
             </View>
-            <View style={styles.pkgBarBg}>
-              <View style={[styles.pkgBarFill, { width: `${(profile.packageLeft / profile.packageTotal) * 100}%` }]} />
-            </View>
-            <Text style={styles.pkgHint}>本月剩余洗车次数，到店出示二维码即可</Text>
-          </LinearGradient>
-        </View>
 
-        {/* 促销横滑 */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 16 }} contentContainerStyle={{ gap: 10, paddingHorizontal: 16 }}>
-          {promos.map((p) => (
-            <Pressable key={p.id} onPress={() => router.push({ pathname: '/promo/[id]', params: { id: p.id } })}>
-              <LinearGradient
-                colors={Gradients[p.grad]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.promo}>
-                <View style={styles.promoTag}>
-                  <Text style={styles.promoTagText}>{p.tag}</Text>
-                </View>
-                <Text style={styles.promoTitle}>{p.title}</Text>
-                <Text style={styles.promoSub}>{p.sub}</Text>
-                <Ionicons name={p.icon} size={64} color="rgba(255,255,255,0.18)" style={styles.promoGhost} />
+            <View style={styles.availability}>
+              <Metric icon="car-sport-outline" label="排队车辆" value={`${bestOutlet.queueCars} 辆`} />
+              <Metric icon="time-outline" label="预计等待" value={`${bestOutlet.waitMins} 分钟`} />
+              <Metric icon="star" label="门店评分" value={bestOutlet.rating.toFixed(1)} />
+            </View>
+
+            <Pressable onPress={() => router.push({ pathname: '/service/[id]', params: { id: 'wash' } })}>
+              <LinearGradient colors={Gradients.brand} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.primaryCta}>
+                <Text style={styles.primaryCtaText}>立即预约洗车</Text>
+                <Ionicons name="arrow-forward" size={18} color="#fff" />
               </LinearGradient>
             </Pressable>
-          ))}
-        </ScrollView>
+          </Card>
 
-        <View style={styles.body}>
-          {/* 服务宫格 2x2 */}
-          <View style={{ marginTop: 16 }}>
-            <SectionTitle title="选择服务" />
+          <View style={styles.packageRow}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.packageLabel}>我的月卡</Text>
+              <Text style={styles.packageValue}>{profile.packageLeft}/{profile.packageTotal} 次可用</Text>
+            </View>
+            <View style={styles.packageBar}>
+              <View style={[styles.packageFill, { width: `${(profile.packageLeft / profile.packageTotal) * 100}%` }]} />
+            </View>
           </View>
-          <View style={styles.grid}>
-            {services.map((s) => (
-              <Pressable key={s.id} style={styles.tile} onPress={() => router.push({ pathname: '/service/[id]', params: { id: s.id } })}>
-                <GradIcon icon={s.icon} grad={s.grad} size={40} iconSize={19} />
-                <Text style={styles.tileName}>{s.name}</Text>
-                <Text style={styles.tileDesc} numberOfLines={1}>{s.desc}</Text>
-                <View style={styles.tileFootRow}>
-                  <Text style={styles.tileFrom}>{s.from > 0 ? `RM${s.from} 起` : '免费报价'}</Text>
-                  <Ionicons name="arrow-forward-circle" size={20} color={Brand.primary} />
-                </View>
+
+          <SectionTitle title="服务分类" />
+          <View style={styles.serviceGrid}>
+            {services.map((service) => (
+              <Pressable key={service.id} style={styles.serviceTile} onPress={() => router.push({ pathname: '/service/[id]', params: { id: service.id } })}>
+                <GradIcon icon={service.icon} grad={service.grad} size={38} iconSize={18} />
+                <Text style={styles.serviceName}>{service.name}</Text>
+                <Text style={styles.serviceDesc} numberOfLines={1}>{service.desc}</Text>
               </Pressable>
             ))}
           </View>
 
-          {/* 附近门店 */}
-          <View style={{ marginTop: 16 }}>
-            <SectionTitle title="附近门店" action="查看全部" onAction={() => toast('门店列表开发中，敬请期待')} />
-          </View>
+          <SectionTitle title={t('queueStatus')} action="问 AI 客服" onAction={() => toast('AI 客服：JagaWash 甲洞店最快，预计等 12 分钟。')} />
+          <Card style={styles.mapCard}>
+            <View style={styles.mapCanvas}>
+              <View style={styles.mapRoadH} />
+              <View style={styles.mapRoadV} />
+              {outlets.map((outlet, index) => (
+                <View key={outlet.id} style={[styles.pin, { left: `${16 + index * 30}%`, top: `${24 + (index % 2) * 36}%` }]}>
+                  <Ionicons name="location-sharp" size={25} color={outlet.openNow ? Brand.primary : Brand.textMuted} />
+                </View>
+              ))}
+            </View>
+            <View style={styles.outletList}>
+              {outlets.map((outlet) => (
+                <View key={outlet.id} style={styles.outletRow}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.outletName}>{outlet.name}</Text>
+                    <Text style={styles.outletSub}>{outlet.queueCars} 辆排队 · 等 {outlet.waitMins} 分钟</Text>
+                  </View>
+                  <Stars rating={outlet.rating} />
+                </View>
+              ))}
+            </View>
+          </Card>
+
+          <SectionTitle title="优惠" />
         </View>
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 12, paddingHorizontal: 16 }}>
-          {outlets.map((o) => (
-            <Pressable key={o.id} onPress={goWash}>
-            <Card style={styles.outlet}>
-              <LinearGradient colors={Gradients.card} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.outletThumb}>
-                <Ionicons name={o.icon} size={30} color="#fff" />
-              </LinearGradient>
-              <Text style={styles.outletName} numberOfLines={1}>{o.name}</Text>
-              <View style={styles.outletMetaRow}>
-                <Ionicons name="location-outline" size={12} color={Brand.textSub} />
-                <Text style={styles.outletArea}>{o.area} · {o.distanceKm}km</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.hScroll}>
+          {promos.map((promo) => (
+            <Pressable key={promo.id} onPress={() => router.push({ pathname: '/promo/[id]', params: { id: promo.id } })}>
+              <View style={styles.promoCard}>
+                <View style={styles.promoHead}>
+                  <Badge text={promo.tag} color={Brand.primary} soft={Brand.primarySoft} />
+                  <Ionicons name={promo.icon} size={22} color={Brand.primary} />
+                </View>
+                <Text style={styles.promoTitle}>{promo.title}</Text>
+                <Text style={styles.promoSub}>{promo.sub}</Text>
               </View>
-              <View style={styles.outletFoot}>
-                <Stars rating={o.rating} />
-                <Text style={styles.outletReviews}>({o.reviews})</Text>
-              </View>
-            </Card>
             </Pressable>
           ))}
         </ScrollView>
 
-        <View style={{ height: 16 }} />
+        <View style={styles.body}>
+          <Pressable style={styles.aiPanel} onPress={() => toast('AI 客服：可以帮你改期、查排队、提交投诉。')}>
+            <Ionicons name="logo-whatsapp" size={22} color="#25D366" />
+            <View style={{ flex: 1 }}>
+              <Text style={styles.aiTitle}>{t('aiCare')}</Text>
+              <Text style={styles.aiSub}>预约提醒、付款通知和投诉跟进都从这里处理。</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={Brand.textSub} />
+          </Pressable>
+        </View>
+
+        <View style={{ height: 18 }} />
       </ScrollView>
 
-      {/* 通知弹窗 */}
       <Modal visible={notifOpen} transparent animationType="fade" onRequestClose={() => setNotifOpen(false)}>
         <Pressable style={styles.modalBg} onPress={() => setNotifOpen(false)}>
           <Pressable style={styles.modalCard} onPress={() => {}}>
             <View style={styles.modalHead}>
-              <Text style={styles.modalTitle}>通知</Text>
+              <Text style={styles.modalTitle}>通知与 WhatsApp</Text>
               <Pressable onPress={() => setNotifOpen(false)} hitSlop={8}>
                 <Ionicons name="close" size={22} color={Brand.textSub} />
               </Pressable>
             </View>
-            {[
-              { icon: 'water' as const, grad: 'wash' as const, t: '预约提醒', s: '明天 14:30 甲洞旗舰店洗车，记得到店' },
-              { icon: 'gift' as const, grad: 'detail' as const, t: '优惠到账', s: '新增 1 张 RM10 镀膜券，7 天内有效' },
-              { icon: 'shield-checkmark' as const, grad: 'insure' as const, t: '车险将到期', s: '保单 30 天后到期，点此比价续保' },
-            ].map((n, i, arr) => (
-              <View key={n.t} style={[styles.notifItem, i === arr.length - 1 && { borderBottomWidth: 0 }]}>
-                <GradIcon icon={n.icon} grad={n.grad} size={38} iconSize={18} />
+            {notifications.map((item) => (
+              <View key={item.id} style={styles.notifItem}>
+                <Ionicons name={item.icon} size={22} color={Brand.primary} />
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.notifTitle}>{n.t}</Text>
-                  <Text style={styles.notifSub}>{n.s}</Text>
+                  <Text style={styles.notifTitle}>{item.title}</Text>
+                  <Text style={styles.notifSub}>{item.body}</Text>
                 </View>
               </View>
             ))}
@@ -170,59 +171,65 @@ export default function HomeScreen() {
   );
 }
 
+function Metric({ icon, label, value }: { icon: keyof typeof Ionicons.glyphMap; label: string; value: string }) {
+  return (
+    <View style={styles.metric}>
+      <Ionicons name={icon} size={16} color={Brand.primary} />
+      <Text style={styles.metricValue}>{value}</Text>
+      <Text style={styles.metricLabel}>{label}</Text>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Brand.bg },
-  heroGrad: { borderBottomLeftRadius: 28, borderBottomRightRadius: 28 },
-  heroPad: { paddingHorizontal: 16, paddingBottom: 18 },
-  topBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingTop: 8 },
-  locLabel: { fontSize: 11, color: Brand.textOnDarkSub },
-  locRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 },
-  locValue: { fontSize: 14, fontWeight: '700', color: '#fff' },
-  bell: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.1)', alignItems: 'center', justifyContent: 'center' },
-  dot: { position: 'absolute', top: 9, right: 10, width: 8, height: 8, borderRadius: 4, backgroundColor: Brand.primary, borderWidth: 1.5, borderColor: Brand.navy },
-  hello: { fontSize: 19, fontWeight: '900', color: '#fff', marginTop: 12 },
-  subHello: { fontSize: 12, color: Brand.textOnDarkSub, marginTop: 2 },
-  search: {
-    flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: '#fff',
-    borderRadius: Radius.pill, paddingHorizontal: 14, paddingVertical: 11, marginTop: 12, ...Shadow.soft,
-  },
-  searchPh: { color: Brand.textSub, fontSize: 13 },
-  scroll: { paddingTop: 0 },
+  header: { backgroundColor: Brand.card, borderBottomWidth: 1, borderBottomColor: Brand.border },
+  headerRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingTop: 8, paddingBottom: 14 },
+  brandMark: { width: 38, height: 38, borderRadius: 10, backgroundColor: Brand.ink, alignItems: 'center', justifyContent: 'center' },
+  brandName: { fontSize: 19, fontWeight: '900', color: Brand.text },
+  locationRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 },
+  locationText: { color: Brand.textSub, fontSize: 12, fontWeight: '700' },
+  iconButton: { width: 40, height: 40, borderRadius: 20, backgroundColor: Brand.bg, alignItems: 'center', justifyContent: 'center' },
+  dot: { position: 'absolute', top: 9, right: 10, width: 8, height: 8, borderRadius: 4, backgroundColor: Brand.primary },
+  scroll: { paddingTop: 14 },
   body: { paddingHorizontal: 16 },
-  // 套餐
-  pkg: { borderRadius: Radius.lg, padding: 14, marginTop: -14, ...Shadow.soft },
-  pkgRow: { flexDirection: 'row', alignItems: 'flex-start' },
-  pkgLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 11, fontWeight: '600' },
-  pkgBig: { color: '#fff', fontSize: 24, fontWeight: '900', marginTop: 1 },
-  pkgBigSub: { fontSize: 13, fontWeight: '700', color: 'rgba(255,255,255,0.8)' },
-  pkgBadge: { flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: 'rgba(255,255,255,0.22)', paddingHorizontal: 8, paddingVertical: 3, borderRadius: Radius.pill },
-  pkgBadgeText: { color: '#fff', fontSize: 10, fontWeight: '800' },
-  pkgBarBg: { height: 6, borderRadius: 3, backgroundColor: 'rgba(255,255,255,0.25)', marginTop: 10, overflow: 'hidden' },
-  pkgBarFill: { height: 6, borderRadius: 3, backgroundColor: '#fff' },
-  pkgHint: { color: 'rgba(255,255,255,0.8)', fontSize: 10, marginTop: 7 },
-  // 促销
-  promo: { width: 190, borderRadius: Radius.lg, padding: 14, minHeight: 104, overflow: 'hidden', ...Shadow.card },
-  promoTag: { alignSelf: 'flex-start', backgroundColor: 'rgba(255,255,255,0.25)', paddingHorizontal: 8, paddingVertical: 2, borderRadius: Radius.pill, marginBottom: 8 },
-  promoTagText: { color: '#fff', fontSize: 9, fontWeight: '800' },
-  promoTitle: { color: '#fff', fontSize: 17, fontWeight: '900', lineHeight: 21 },
-  promoSub: { color: 'rgba(255,255,255,0.9)', fontSize: 11, marginTop: 4 },
-  promoGhost: { position: 'absolute', right: -8, bottom: -8 },
-  // 服务宫格
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  tile: { width: '47%', flexGrow: 1, backgroundColor: Brand.card, borderRadius: Radius.md, padding: 12, ...Shadow.card },
-  tileName: { fontSize: 14, fontWeight: '800', color: Brand.text, marginTop: 8 },
-  tileDesc: { fontSize: 10, color: Brand.textSub, marginTop: 2 },
-  tileFootRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 8 },
-  tileFrom: { fontSize: 13, fontWeight: '800', color: Brand.primary },
-  // 门店
-  outlet: { width: 180, padding: 12 },
-  outletThumb: { height: 78, borderRadius: Radius.md, alignItems: 'center', justifyContent: 'center', marginBottom: 10 },
-  outletName: { fontSize: 14, fontWeight: '800', color: Brand.text },
-  outletMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 5 },
-  outletArea: { fontSize: 11, color: Brand.textSub },
-  outletFoot: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 8 },
-  outletReviews: { fontSize: 11, color: Brand.textSub },
-  // modal
+  readyCard: { ...Shadow.soft },
+  readyTop: { flexDirection: 'row', justifyContent: 'space-between', gap: 12 },
+  eyebrow: { color: Brand.primary, fontSize: 11, fontWeight: '900', marginBottom: 5 },
+  readyTitle: { color: Brand.text, fontSize: 20, fontWeight: '900' },
+  readyMeta: { color: Brand.textSub, fontSize: 12, marginTop: 4 },
+  availability: { flexDirection: 'row', gap: 8, marginTop: 16 },
+  metric: { flex: 1, backgroundColor: Brand.bg, borderRadius: Radius.md, padding: 10, gap: 3 },
+  metricValue: { color: Brand.text, fontSize: 15, fontWeight: '900' },
+  metricLabel: { color: Brand.textSub, fontSize: 10, fontWeight: '700' },
+  primaryCta: { marginTop: 16, borderRadius: Radius.md, paddingVertical: 14, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 8 },
+  primaryCtaText: { color: '#fff', fontWeight: '900', fontSize: 15 },
+  packageRow: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: Brand.card, borderWidth: 1, borderColor: Brand.border, borderRadius: Radius.lg, padding: 14, marginTop: 12, marginBottom: 18 },
+  packageLabel: { color: Brand.textSub, fontSize: 11, fontWeight: '700' },
+  packageValue: { color: Brand.text, fontSize: 15, fontWeight: '900', marginTop: 2 },
+  packageBar: { width: 96, height: 8, borderRadius: 4, overflow: 'hidden', backgroundColor: Brand.border },
+  packageFill: { height: 8, borderRadius: 4, backgroundColor: Brand.primary },
+  serviceGrid: { flexDirection: 'row', gap: 10, marginBottom: 18 },
+  serviceTile: { flex: 1, backgroundColor: Brand.card, borderWidth: 1, borderColor: Brand.border, borderRadius: Radius.lg, padding: 12 },
+  serviceName: { color: Brand.text, fontSize: 13, fontWeight: '900', marginTop: 8 },
+  serviceDesc: { color: Brand.textSub, fontSize: 10, marginTop: 3 },
+  mapCard: { padding: 12, marginBottom: 18 },
+  mapCanvas: { height: 112, borderRadius: Radius.md, backgroundColor: Brand.blueSoft, overflow: 'hidden' },
+  mapRoadH: { position: 'absolute', left: -20, right: -20, top: 52, height: 14, backgroundColor: 'rgba(255,255,255,0.72)', transform: [{ rotate: '-8deg' }] },
+  mapRoadV: { position: 'absolute', top: -20, bottom: -20, left: 172, width: 14, backgroundColor: 'rgba(255,255,255,0.72)', transform: [{ rotate: '15deg' }] },
+  pin: { position: 'absolute' },
+  outletList: { marginTop: 10 },
+  outletRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 9, borderBottomWidth: 1, borderBottomColor: Brand.border },
+  outletName: { color: Brand.text, fontSize: 13, fontWeight: '800' },
+  outletSub: { color: Brand.textSub, fontSize: 11, marginTop: 2 },
+  hScroll: { gap: 10, paddingHorizontal: 16, paddingBottom: 16 },
+  promoCard: { width: 170, minHeight: 116, borderRadius: Radius.lg, borderWidth: 1, borderColor: Brand.border, backgroundColor: Brand.card, padding: 14 },
+  promoHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  promoTitle: { color: Brand.text, fontSize: 18, fontWeight: '900', lineHeight: 22, marginTop: 12 },
+  promoSub: { color: Brand.textSub, fontSize: 11, marginTop: 6 },
+  aiPanel: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: Brand.card, borderWidth: 1, borderColor: Brand.border, borderRadius: Radius.lg, padding: 14 },
+  aiTitle: { color: Brand.text, fontSize: 14, fontWeight: '900' },
+  aiSub: { color: Brand.textSub, fontSize: 11, marginTop: 3 },
   modalBg: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', paddingHorizontal: 24 },
   modalCard: { backgroundColor: '#fff', borderRadius: Radius.lg, padding: 18 },
   modalHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },

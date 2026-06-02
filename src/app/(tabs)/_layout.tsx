@@ -3,9 +3,11 @@ import { Tabs } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Brand } from '@/constants/brand';
+import { useI18n } from '@/store/i18n';
 
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
+  const { t } = useI18n();
 
   return (
     <Tabs
@@ -16,7 +18,7 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: Brand.card,
           borderTopColor: Brand.border,
-          height: 58 + insets.bottom,
+          height: 60 + insets.bottom,
           paddingBottom: insets.bottom > 0 ? insets.bottom : 8,
           paddingTop: 8,
         },
@@ -26,7 +28,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: '首页',
+          title: t('home'),
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? 'home' : 'home-outline'} size={22} color={color} />
           ),
@@ -35,7 +37,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="booking"
         options={{
-          title: '预约',
+          title: t('booking'),
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? 'calendar' : 'calendar-outline'} size={22} color={color} />
           ),
@@ -44,16 +46,25 @@ export default function TabLayout() {
       <Tabs.Screen
         name="orders"
         options={{
-          title: '订单',
+          title: t('orders'),
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? 'receipt' : 'receipt-outline'} size={22} color={color} />
           ),
         }}
       />
       <Tabs.Screen
+        name="staff"
+        options={{
+          title: t('staff'),
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'scan' : 'scan-outline'} size={22} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="profile"
         options={{
-          title: '我的',
+          title: t('profile'),
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? 'person' : 'person-outline'} size={22} color={color} />
           ),

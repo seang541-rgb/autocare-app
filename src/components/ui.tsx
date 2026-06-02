@@ -5,11 +5,10 @@ import { ReactNode } from 'react';
 import { Pressable, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Brand, Gradients, Radius, Shadow } from '@/constants/brand';
+import { AppBrand, Brand, Gradients, Radius, Shadow } from '@/constants/brand';
 
 type IconName = keyof typeof Ionicons.glyphMap;
 
-/** 子页面渐变返回头 */
 export function BackHeader({ title, sub }: { title: string; sub?: string }) {
   return (
     <LinearGradient colors={Gradients.hero} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={hdr.grad}>
@@ -23,7 +22,7 @@ export function BackHeader({ title, sub }: { title: string; sub?: string }) {
           </Pressable>
           <View style={{ flex: 1 }}>
             <Text style={hdr.title}>{title}</Text>
-            {sub ? <Text style={hdr.sub}>{sub}</Text> : null}
+            <Text style={hdr.sub}>{sub ?? AppBrand.name}</Text>
           </View>
         </View>
       </SafeAreaView>
@@ -35,7 +34,6 @@ export function Card({ children, style }: { children: ReactNode; style?: StylePr
   return <View style={[styles.card, style]}>{children}</View>;
 }
 
-/** 渐变图标圆角方块 */
 export function GradIcon({
   icon,
   grad,
@@ -52,7 +50,7 @@ export function GradIcon({
       colors={Gradients[grad]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
-      style={{ width: size, height: size, borderRadius: size * 0.32, alignItems: 'center', justifyContent: 'center' }}>
+      style={{ width: size, height: size, borderRadius: Math.max(8, size * 0.24), alignItems: 'center', justifyContent: 'center' }}>
       <Ionicons name={icon} size={iconSize} color="#fff" />
     </LinearGradient>
   );
@@ -64,7 +62,7 @@ export function SectionTitle({ title, action, onAction }: { title: string; actio
       <Text style={styles.sectionTitle}>{title}</Text>
       {action ? (
         <Text style={styles.sectionAction} onPress={onAction}>
-          {action} ›
+          {action}
         </Text>
       ) : null}
     </View>
@@ -100,6 +98,8 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: Brand.card,
     borderRadius: Radius.lg,
+    borderWidth: 1,
+    borderColor: Brand.border,
     padding: 16,
     ...Shadow.card,
   },
@@ -109,16 +109,16 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 12,
   },
-  sectionTitle: { fontSize: 16, fontWeight: '800', color: Brand.text, letterSpacing: 0.2 },
-  sectionAction: { fontSize: 12, color: Brand.primary, fontWeight: '700' },
+  sectionTitle: { fontSize: 16, fontWeight: '800', color: Brand.text },
+  sectionAction: { fontSize: 12, color: Brand.primary, fontWeight: '800' },
   badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: Radius.pill, alignSelf: 'flex-start' },
   badgeText: { fontSize: 11, fontWeight: '800' },
 });
 
 const hdr = StyleSheet.create({
-  grad: { borderBottomLeftRadius: 24, borderBottomRightRadius: 24 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 12, paddingTop: 6, paddingBottom: 16 },
+  grad: { borderBottomLeftRadius: 18, borderBottomRightRadius: 18 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 14, paddingTop: 6, paddingBottom: 16 },
   back: { width: 38, height: 38, borderRadius: 19, backgroundColor: 'rgba(255,255,255,0.12)', alignItems: 'center', justifyContent: 'center' },
   title: { fontSize: 18, fontWeight: '900', color: '#fff' },
-  sub: { fontSize: 12, color: 'rgba(255,255,255,0.62)', marginTop: 2 },
+  sub: { fontSize: 12, color: Brand.textOnDarkSub, marginTop: 2 },
 });

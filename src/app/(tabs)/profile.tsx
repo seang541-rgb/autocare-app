@@ -4,31 +4,40 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Card, GradIcon } from '@/components/ui';
-import { Brand, Gradients, Radius, Shadow } from '@/constants/brand';
+import { AppBrand, Brand, Gradients, Radius, Shadow } from '@/constants/brand';
 import { profile } from '@/constants/data';
+import { Language, useI18n } from '@/store/i18n';
 import { useToast } from '@/store/toast';
 
 type IconName = keyof typeof Ionicons.glyphMap;
+
 const MENU: { icon: IconName; label: string; sub: string }[] = [
   { icon: 'car-sport-outline', label: '我的车辆', sub: profile.car.plate },
-  { icon: 'shield-checkmark-outline', label: '我的保单', sub: '1 份生效中' },
   { icon: 'ticket-outline', label: '优惠券', sub: `${profile.coupons} 张可用` },
-  { icon: 'card-outline', label: '支付方式', sub: '' },
+  { icon: 'card-outline', label: '支付方式', sub: 'TnG · FPX · Card' },
   { icon: 'location-outline', label: '地址管理', sub: '' },
-  { icon: 'headset-outline', label: '联系客服', sub: '' },
+  { icon: 'logo-whatsapp', label: 'WhatsApp / AI 客服', sub: '预约、付款、投诉' },
+  { icon: 'alert-circle-outline', label: '投诉中心', sub: '服务问题跟进' },
   { icon: 'settings-outline', label: '设置', sub: '' },
+];
+
+const LANGS: { key: Language; labelKey: string }[] = [
+  { key: 'zh', labelKey: 'chinese' },
+  { key: 'en', labelKey: 'english' },
+  { key: 'ms', labelKey: 'malay' },
 ];
 
 export default function ProfileScreen() {
   const toast = useToast();
+  const { lang, setLang, t } = useI18n();
+
   return (
     <View style={styles.root}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* 渐变会员头部 */}
         <LinearGradient colors={Gradients.hero} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.headerGrad}>
           <SafeAreaView edges={['top']}>
             <View style={styles.headerPad}>
-              <Text style={styles.pageTitle}>我的</Text>
+              <Text style={styles.pageTitle}>{t('profile')}</Text>
               <View style={styles.userTop}>
                 <LinearGradient colors={Gradients.brand} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.avatar}>
                   <Ionicons name="person" size={28} color="#fff" />
@@ -48,26 +57,29 @@ export default function ProfileScreen() {
         </LinearGradient>
 
         <View style={styles.body}>
-          {/* 数据统计卡（上浮） */}
           <Card style={styles.statsCard}>
-            <View style={styles.stat}>
-              <Text style={styles.statNum}>{profile.points}</Text>
-              <Text style={styles.statLabel}>积分</Text>
-            </View>
+            <Stat num={profile.points} label="积分" />
             <View style={styles.statDiv} />
-            <View style={styles.stat}>
-              <Text style={styles.statNum}>{profile.packageLeft}</Text>
-              <Text style={styles.statLabel}>剩余洗车</Text>
-            </View>
+            <Stat num={profile.packageLeft} label="剩余洗车" />
             <View style={styles.statDiv} />
-            <View style={styles.stat}>
-              <Text style={styles.statNum}>{profile.coupons}</Text>
-              <Text style={styles.statLabel}>优惠券</Text>
+            <Stat num={profile.coupons} label="优惠券" />
+          </Card>
+
+          <Card style={{ marginTop: 14 }}>
+            <Text style={styles.sectionTitle}>{t('language')}</Text>
+            <View style={styles.langRow}>
+              {LANGS.map((item) => {
+                const on = item.key === lang;
+                return (
+                  <Pressable key={item.key} onPress={() => setLang(item.key)} style={[styles.langBtn, on && styles.langBtnOn]}>
+                    <Text style={[styles.langText, on && styles.langTextOn]}>{t(item.labelKey)}</Text>
+                  </Pressable>
+                );
+              })}
             </View>
           </Card>
 
-          {/* 车辆卡 */}
-          <Pressable onPress={() => toast('车辆管理开发中，敬请期待')}>
+          <Pressable onPress={() => toast('车辆管理开发中')}>
             <Card style={{ marginTop: 14 }}>
               <View style={styles.carRow}>
                 <GradIcon icon="car-sport" grad="brand" size={48} iconSize={24} />
@@ -80,10 +92,9 @@ export default function ProfileScreen() {
             </Card>
           </Pressable>
 
-          {/* 菜单 */}
           <Card style={{ marginTop: 14, paddingVertical: 4 }}>
             {MENU.map((m, i) => (
-              <Pressable key={m.label} onPress={() => toast(`${m.label}开发中，敬请期待`)}>
+              <Pressable key={m.label} onPress={() => toast(`${m.label}：Demo 功能已接入入口`)}>
                 <View style={[styles.menuRow, i < MENU.length - 1 && styles.menuBorder]}>
                   <View style={styles.menuIconWrap}>
                     <Ionicons name={m.icon} size={19} color={Brand.primary} />
@@ -97,10 +108,19 @@ export default function ProfileScreen() {
             ))}
           </Card>
 
-          <Text style={styles.version}>AutoCare v0.2 · 参考 KeyAuto WeK4U</Text>
+          <Text style={styles.version}>{AppBrand.name} v0.4 · Malaysia-ready</Text>
           <View style={{ height: 20 }} />
         </View>
       </ScrollView>
+    </View>
+  );
+}
+
+function Stat({ num, label }: { num: number; label: string }) {
+  return (
+    <View style={styles.stat}>
+      <Text style={styles.statNum}>{num}</Text>
+      <Text style={styles.statLabel}>{label}</Text>
     </View>
   );
 }
@@ -122,6 +142,12 @@ const styles = StyleSheet.create({
   statDiv: { width: 1, height: 30, backgroundColor: Brand.border },
   statNum: { fontSize: 20, fontWeight: '900', color: Brand.text },
   statLabel: { fontSize: 11, color: Brand.textSub, marginTop: 3 },
+  sectionTitle: { fontSize: 15, fontWeight: '900', color: Brand.text, marginBottom: 10 },
+  langRow: { flexDirection: 'row', gap: 8 },
+  langBtn: { flex: 1, alignItems: 'center', paddingVertical: 10, borderRadius: Radius.pill, backgroundColor: Brand.bg },
+  langBtnOn: { backgroundColor: Brand.primary },
+  langText: { color: Brand.text, fontSize: 12, fontWeight: '800' },
+  langTextOn: { color: '#fff' },
   carRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   carPlate: { fontSize: 16, fontWeight: '900', color: Brand.text },
   carModel: { fontSize: 12, color: Brand.textSub, marginTop: 3 },
@@ -129,6 +155,6 @@ const styles = StyleSheet.create({
   menuBorder: { borderBottomWidth: 1, borderBottomColor: Brand.border },
   menuIconWrap: { width: 34, height: 34, borderRadius: 10, backgroundColor: Brand.primarySoft, alignItems: 'center', justifyContent: 'center' },
   menuLabel: { fontSize: 15, fontWeight: '600', color: Brand.text },
-  menuSub: { fontSize: 13, color: Brand.textSub, marginRight: 6 },
+  menuSub: { fontSize: 12, color: Brand.textSub, marginRight: 6 },
   version: { textAlign: 'center', color: Brand.textSub, fontSize: 12, marginTop: 24 },
 });

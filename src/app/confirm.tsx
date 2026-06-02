@@ -38,6 +38,7 @@ export default function Confirm() {
         icon: (p.icon as any) ?? 'water',
         grad: (p.grad as any) ?? 'wash',
         outlet: outlet.name,
+        outletId: outlet.id,
         date: `2026-06-${d.day}`,
         time: slot,
         price,
