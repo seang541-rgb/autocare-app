@@ -8,9 +8,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Badge, Card, GradIcon, SectionTitle, Stars } from '@/components/ui';
 import { Brand, Gradients, Radius, Shadow } from '@/constants/brand';
 import { outlets, profile, promos, services } from '@/constants/data';
+import { useToast } from '@/store/toast';
 
 export default function HomeScreen() {
   const [notifOpen, setNotifOpen] = useState(false);
+  const toast = useToast();
+  const goWash = () => router.push({ pathname: '/service/[id]', params: { id: 'wash' } });
 
   return (
     <View style={styles.root}>
@@ -36,7 +39,7 @@ export default function HomeScreen() {
             <Text style={styles.hello}>嗨，{profile.name} 👋</Text>
             <Text style={styles.subHello}>今天想为爱车做点什么？</Text>
 
-            <Pressable style={styles.search} onPress={() => {}}>
+            <Pressable style={styles.search} onPress={() => toast('搜索功能开发中，敬请期待')}>
               <Ionicons name="search" size={18} color={Brand.textSub} />
               <Text style={styles.searchPh}>搜索服务、门店或套餐</Text>
             </Pressable>
@@ -71,19 +74,20 @@ export default function HomeScreen() {
         {/* 促销横滑 */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 16 }} contentContainerStyle={{ gap: 10, paddingHorizontal: 16 }}>
           {promos.map((p) => (
-            <LinearGradient
-              key={p.id}
-              colors={Gradients[p.grad]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.promo}>
-              <View style={styles.promoTag}>
-                <Text style={styles.promoTagText}>{p.tag}</Text>
-              </View>
-              <Text style={styles.promoTitle}>{p.title}</Text>
-              <Text style={styles.promoSub}>{p.sub}</Text>
-              <Ionicons name={p.icon} size={64} color="rgba(255,255,255,0.18)" style={styles.promoGhost} />
-            </LinearGradient>
+            <Pressable key={p.id} onPress={goWash}>
+              <LinearGradient
+                colors={Gradients[p.grad]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.promo}>
+                <View style={styles.promoTag}>
+                  <Text style={styles.promoTagText}>{p.tag}</Text>
+                </View>
+                <Text style={styles.promoTitle}>{p.title}</Text>
+                <Text style={styles.promoSub}>{p.sub}</Text>
+                <Ionicons name={p.icon} size={64} color="rgba(255,255,255,0.18)" style={styles.promoGhost} />
+              </LinearGradient>
+            </Pressable>
           ))}
         </ScrollView>
 
@@ -108,13 +112,14 @@ export default function HomeScreen() {
 
           {/* 附近门店 */}
           <View style={{ marginTop: 16 }}>
-            <SectionTitle title="附近门店" action="查看全部" />
+            <SectionTitle title="附近门店" action="查看全部" onAction={() => toast('门店列表开发中，敬请期待')} />
           </View>
         </View>
 
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 12, paddingHorizontal: 16 }}>
           {outlets.map((o) => (
-            <Card key={o.id} style={styles.outlet}>
+            <Pressable key={o.id} onPress={goWash}>
+            <Card style={styles.outlet}>
               <LinearGradient colors={Gradients.card} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.outletThumb}>
                 <Ionicons name={o.icon} size={30} color="#fff" />
               </LinearGradient>
@@ -128,6 +133,7 @@ export default function HomeScreen() {
                 <Text style={styles.outletReviews}>({o.reviews})</Text>
               </View>
             </Card>
+            </Pressable>
           ))}
         </ScrollView>
 

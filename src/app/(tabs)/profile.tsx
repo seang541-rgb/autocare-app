@@ -1,11 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Card, GradIcon } from '@/components/ui';
 import { Brand, Gradients, Radius, Shadow } from '@/constants/brand';
 import { profile } from '@/constants/data';
+import { useToast } from '@/store/toast';
 
 type IconName = keyof typeof Ionicons.glyphMap;
 const MENU: { icon: IconName; label: string; sub: string }[] = [
@@ -19,6 +20,7 @@ const MENU: { icon: IconName; label: string; sub: string }[] = [
 ];
 
 export default function ProfileScreen() {
+  const toast = useToast();
   return (
     <View style={styles.root}>
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -65,29 +67,33 @@ export default function ProfileScreen() {
           </Card>
 
           {/* 车辆卡 */}
-          <Card style={{ marginTop: 14 }}>
-            <View style={styles.carRow}>
-              <GradIcon icon="car-sport" grad="brand" size={48} iconSize={24} />
-              <View style={{ flex: 1 }}>
-                <Text style={styles.carPlate}>{profile.car.plate}</Text>
-                <Text style={styles.carModel}>{profile.car.model} · {profile.car.year}</Text>
+          <Pressable onPress={() => toast('车辆管理开发中，敬请期待')}>
+            <Card style={{ marginTop: 14 }}>
+              <View style={styles.carRow}>
+                <GradIcon icon="car-sport" grad="brand" size={48} iconSize={24} />
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.carPlate}>{profile.car.plate}</Text>
+                  <Text style={styles.carModel}>{profile.car.model} · {profile.car.year}</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color={Brand.textSub} />
               </View>
-              <Ionicons name="chevron-forward" size={20} color={Brand.textSub} />
-            </View>
-          </Card>
+            </Card>
+          </Pressable>
 
           {/* 菜单 */}
           <Card style={{ marginTop: 14, paddingVertical: 4 }}>
             {MENU.map((m, i) => (
-              <View key={m.label} style={[styles.menuRow, i < MENU.length - 1 && styles.menuBorder]}>
-                <View style={styles.menuIconWrap}>
-                  <Ionicons name={m.icon} size={19} color={Brand.primary} />
+              <Pressable key={m.label} onPress={() => toast(`${m.label}开发中，敬请期待`)}>
+                <View style={[styles.menuRow, i < MENU.length - 1 && styles.menuBorder]}>
+                  <View style={styles.menuIconWrap}>
+                    <Ionicons name={m.icon} size={19} color={Brand.primary} />
+                  </View>
+                  <Text style={styles.menuLabel}>{m.label}</Text>
+                  <View style={{ flex: 1 }} />
+                  {m.sub ? <Text style={styles.menuSub}>{m.sub}</Text> : null}
+                  <Ionicons name="chevron-forward" size={18} color={Brand.textSub} />
                 </View>
-                <Text style={styles.menuLabel}>{m.label}</Text>
-                <View style={{ flex: 1 }} />
-                {m.sub ? <Text style={styles.menuSub}>{m.sub}</Text> : null}
-                <Ionicons name="chevron-forward" size={18} color={Brand.textSub} />
-              </View>
+              </Pressable>
             ))}
           </Card>
 
