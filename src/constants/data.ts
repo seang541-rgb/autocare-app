@@ -1,21 +1,23 @@
-// AutoCare 雏形用模拟数据
+// AutoCare 模拟数据（icon = Ionicons 名称，grad = Gradients key）
+
+import type { Ionicons } from '@expo/vector-icons';
+type IconName = keyof typeof Ionicons.glyphMap;
 
 export type Service = {
   id: string;
   name: string;
   brand: string;
-  emoji: string;
+  icon: IconName;
+  grad: 'wash' | 'tyre' | 'detail' | 'insure';
   desc: string;
   from: number; // 起价 RM
-  color: string;
-  soft: string;
 };
 
 export const services: Service[] = [
-  { id: 'wash', name: '洗车', brand: 'KeyWash', emoji: '💧', desc: '自动洗车 · 免费吸尘', from: 12, color: '#2563EB', soft: '#DBEAFE' },
-  { id: 'tyre', name: '轮胎保养', brand: 'KeyTyre', emoji: '🛞', desc: '换胎 · 定位 · 一般保养', from: 80, color: '#0F172A', soft: '#E2E8F0' },
-  { id: 'detail', name: '镀膜美容', brand: 'KeyDetailing', emoji: '✨', desc: '内外清洁 · 镀膜 · 包膜', from: 199, color: '#FF5A1F', soft: '#FFE9E0' },
-  { id: 'insure', name: '车险续保', brand: 'KeyPlus', emoji: '🛡️', desc: '多家比价 · 免息分期', from: 0, color: '#16A34A', soft: '#DCFCE7' },
+  { id: 'wash', name: '洗车', brand: 'KeyWash', icon: 'water', grad: 'wash', desc: '自动洗车 · 免费吸尘', from: 12 },
+  { id: 'tyre', name: '轮胎保养', brand: 'KeyTyre', icon: 'disc', grad: 'tyre', desc: '换胎 · 定位 · 一般保养', from: 80 },
+  { id: 'detail', name: '镀膜美容', brand: 'KeyDetailing', icon: 'sparkles', grad: 'detail', desc: '内外清洁 · 镀膜 · 包膜', from: 199 },
+  { id: 'insure', name: '车险续保', brand: 'KeyPlus', icon: 'shield-checkmark', grad: 'insure', desc: '多家比价 · 免息分期', from: 0 },
 ];
 
 export type Outlet = {
@@ -26,13 +28,13 @@ export type Outlet = {
   rating: number;
   reviews: number;
   open: string;
-  emoji: string;
+  icon: IconName;
 };
 
 export const outlets: Outlet[] = [
-  { id: 'o1', name: 'KeyWash 甲洞旗舰店', area: 'Kepong, KL', distanceKm: 1.2, rating: 4.8, reviews: 326, open: '08:00 - 22:00', emoji: '🏪' },
-  { id: 'o2', name: 'KeyWash Segambut 分行', area: 'Segambut, KL', distanceKm: 3.5, rating: 4.6, reviews: 188, open: '08:00 - 23:00', emoji: '🏬' },
-  { id: 'o3', name: 'KeyTyre 轮胎中心', area: 'Kepong, KL', distanceKm: 2.1, rating: 4.7, reviews: 142, open: '09:00 - 19:00', emoji: '🔧' },
+  { id: 'o1', name: 'KeyWash 甲洞旗舰店', area: 'Kepong, KL', distanceKm: 1.2, rating: 4.8, reviews: 326, open: '08:00 - 22:00', icon: 'storefront' },
+  { id: 'o2', name: 'KeyWash Segambut 分行', area: 'Segambut, KL', distanceKm: 3.5, rating: 4.6, reviews: 188, open: '08:00 - 23:00', icon: 'business' },
+  { id: 'o3', name: 'KeyTyre 轮胎中心', area: 'Kepong, KL', distanceKm: 2.1, rating: 4.7, reviews: 142, open: '09:00 - 19:00', icon: 'construct' },
 ];
 
 export type Promo = {
@@ -40,20 +42,21 @@ export type Promo = {
   title: string;
   sub: string;
   tag: string;
-  from: string;
-  to: string;
+  grad: 'promo1' | 'promo2' | 'promo3';
+  icon: IconName;
 };
 
 export const promos: Promo[] = [
-  { id: 'p1', title: 'RM50 / 月 无限洗', sub: '大车小车 一视同车', tag: '本月热卖', from: '#FF5A1F', to: '#E14A12' },
-  { id: 'p2', title: 'RM1 体验洗车', sub: '半夜也能洗', tag: '新客限定', from: '#2563EB', to: '#1E3A8A' },
-  { id: 'p3', title: '车险续保最高省 30%', sub: 'KeyPlus 多家比价', tag: '免息分期', from: '#16A34A', to: '#065F46' },
+  { id: 'p1', title: 'RM50 / 月\n无限洗', sub: '大车小车 一视同车', tag: '本月热卖', grad: 'promo1', icon: 'water' },
+  { id: 'p2', title: 'RM1\n体验洗车', sub: '半夜也能洗', tag: '新客限定', grad: 'promo2', icon: 'moon' },
+  { id: 'p3', title: '车险续保\n最高省 30%', sub: 'KeyPlus 多家比价', tag: '免息分期', grad: 'promo3', icon: 'shield-checkmark' },
 ];
 
 export type Order = {
   id: string;
   service: string;
-  emoji: string;
+  icon: IconName;
+  grad: 'wash' | 'tyre' | 'detail' | 'insure';
   outlet: string;
   date: string;
   time: string;
@@ -62,10 +65,10 @@ export type Order = {
 };
 
 export const orders: Order[] = [
-  { id: '#A2391', service: '自动洗车 + 吸尘', emoji: '💧', outlet: 'KeyWash 甲洞旗舰店', date: '2026-06-03', time: '14:30', price: 18, status: 'upcoming' },
-  { id: '#A2384', service: '镀膜美容（小车）', emoji: '✨', outlet: 'KeyDetailing 甲洞', date: '2026-06-08', time: '10:00', price: 299, status: 'upcoming' },
-  { id: '#A2360', service: '四轮定位', emoji: '🛞', outlet: 'KeyTyre 轮胎中心', date: '2026-05-21', time: '11:00', price: 80, status: 'done' },
-  { id: '#A2351', service: '自动洗车', emoji: '💧', outlet: 'KeyWash Segambut', date: '2026-05-12', time: '19:30', price: 12, status: 'done' },
+  { id: '#A2391', service: '自动洗车 + 吸尘', icon: 'water', grad: 'wash', outlet: 'KeyWash 甲洞旗舰店', date: '2026-06-03', time: '14:30', price: 18, status: 'upcoming' },
+  { id: '#A2384', service: '镀膜美容（小车）', icon: 'sparkles', grad: 'detail', outlet: 'KeyDetailing 甲洞', date: '2026-06-08', time: '10:00', price: 299, status: 'upcoming' },
+  { id: '#A2360', service: '四轮定位', icon: 'disc', grad: 'tyre', outlet: 'KeyTyre 轮胎中心', date: '2026-05-21', time: '11:00', price: 80, status: 'done' },
+  { id: '#A2351', service: '自动洗车', icon: 'water', grad: 'wash', outlet: 'KeyWash Segambut', date: '2026-05-12', time: '19:30', price: 12, status: 'done' },
 ];
 
 export const dates = [

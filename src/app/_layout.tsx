@@ -1,12 +1,8 @@
+import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
-import { Text } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Brand } from '@/constants/brand';
-
-function TabIcon({ emoji, focused }: { emoji: string; focused: boolean }) {
-  return <Text style={{ fontSize: 19, opacity: focused ? 1 : 0.4 }}>{emoji}</Text>;
-}
 
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
@@ -16,33 +12,52 @@ export default function TabLayout() {
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: Brand.primary,
-        tabBarInactiveTintColor: Brand.textSub,
+        tabBarInactiveTintColor: '#9AA0B0',
         tabBarStyle: {
           backgroundColor: Brand.card,
           borderTopColor: Brand.border,
-          // 系统导航条高度 + 内容区，避免与手机底部手势条重叠
-          height: 56 + insets.bottom,
+          height: 58 + insets.bottom,
           paddingBottom: insets.bottom > 0 ? insets.bottom : 8,
-          paddingTop: 6,
+          paddingTop: 8,
         },
-        tabBarLabelStyle: { fontSize: 10, fontWeight: '600' },
+        tabBarLabelStyle: { fontSize: 10, fontWeight: '700' },
         tabBarItemStyle: { paddingTop: 2 },
       }}>
       <Tabs.Screen
         name="index"
-        options={{ title: '首页', tabBarIcon: ({ focused }) => <TabIcon emoji="🏠" focused={focused} /> }}
+        options={{
+          title: '首页',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'home' : 'home-outline'} size={22} color={color} />
+          ),
+        }}
       />
       <Tabs.Screen
         name="booking"
-        options={{ title: '预约', tabBarIcon: ({ focused }) => <TabIcon emoji="📅" focused={focused} /> }}
+        options={{
+          title: '预约',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'calendar' : 'calendar-outline'} size={22} color={color} />
+          ),
+        }}
       />
       <Tabs.Screen
         name="orders"
-        options={{ title: '订单', tabBarIcon: ({ focused }) => <TabIcon emoji="🧾" focused={focused} /> }}
+        options={{
+          title: '订单',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'receipt' : 'receipt-outline'} size={22} color={color} />
+          ),
+        }}
       />
       <Tabs.Screen
         name="profile"
-        options={{ title: '我的', tabBarIcon: ({ focused }) => <TabIcon emoji="👤" focused={focused} /> }}
+        options={{
+          title: '我的',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'person' : 'person-outline'} size={22} color={color} />
+          ),
+        }}
       />
     </Tabs>
   );
