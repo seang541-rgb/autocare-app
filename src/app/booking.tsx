@@ -128,11 +128,11 @@ export default function BookingScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Brand.bg },
-  header: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 4 },
-  headerTitle: { fontSize: 24, fontWeight: '900', color: Brand.text },
-  headerSub: { fontSize: 13, color: Brand.textSub, marginTop: 2 },
-  scroll: { paddingHorizontal: 16, paddingBottom: 24 },
-  step: { fontSize: 15, fontWeight: '800', color: Brand.text, marginTop: 22, marginBottom: 12 },
+  header: { paddingHorizontal: 16, paddingTop: 6, paddingBottom: 4 },
+  headerTitle: { fontSize: 19, fontWeight: '900', color: Brand.text },
+  headerSub: { fontSize: 12, color: Brand.textSub, marginTop: 2 },
+  scroll: { paddingHorizontal: 16, paddingBottom: 20 },
+  step: { fontSize: 14, fontWeight: '800', color: Brand.text, marginTop: 18, marginBottom: 10 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   svcChip: {
     flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, paddingVertical: 10,

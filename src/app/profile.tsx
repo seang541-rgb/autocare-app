@@ -91,7 +91,7 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Brand.bg },
   scroll: { paddingHorizontal: 16, paddingBottom: 16 },
-  title: { fontSize: 24, fontWeight: '900', color: Brand.text, marginTop: 8, marginBottom: 16 },
+  title: { fontSize: 19, fontWeight: '900', color: Brand.text, marginTop: 6, marginBottom: 12 },
   userCard: { backgroundColor: Brand.navy },
   userTop: { flexDirection: 'row', gap: 14, alignItems: 'center' },
   avatar: { width: 60, height: 60, borderRadius: 30, backgroundColor: 'rgba(255,255,255,0.12)', alignItems: 'center', justifyContent: 'center' },

@@ -98,8 +98,8 @@ export default function OrdersScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Brand.bg },
-  header: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12 },
-  headerTitle: { fontSize: 24, fontWeight: '900', color: Brand.text },
+  header: { paddingHorizontal: 16, paddingTop: 6, paddingBottom: 10 },
+  headerTitle: { fontSize: 19, fontWeight: '900', color: Brand.text },
   segment: {
     flexDirection: 'row', marginHorizontal: 16, backgroundColor: Brand.card, borderRadius: Radius.pill,
     padding: 4, marginBottom: 16,

@@ -1,15 +1,16 @@
 import { Tabs } from 'expo-router';
-import { Platform, Text } from 'react-native';
+import { Text } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Brand } from '@/constants/brand';
 
 function TabIcon({ emoji, focused }: { emoji: string; focused: boolean }) {
-  return (
-    <Text style={{ fontSize: 22, opacity: focused ? 1 : 0.45 }}>{emoji}</Text>
-  );
+  return <Text style={{ fontSize: 19, opacity: focused ? 1 : 0.4 }}>{emoji}</Text>;
 }
 
 export default function TabLayout() {
+  const insets = useSafeAreaInsets();
+
   return (
     <Tabs
       screenOptions={{
@@ -19,11 +20,13 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: Brand.card,
           borderTopColor: Brand.border,
-          height: Platform.OS === 'ios' ? 86 : 64,
-          paddingBottom: Platform.OS === 'ios' ? 28 : 8,
-          paddingTop: 8,
+          // 系统导航条高度 + 内容区，避免与手机底部手势条重叠
+          height: 56 + insets.bottom,
+          paddingBottom: insets.bottom > 0 ? insets.bottom : 8,
+          paddingTop: 6,
         },
-        tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
+        tabBarLabelStyle: { fontSize: 10, fontWeight: '600' },
+        tabBarItemStyle: { paddingTop: 2 },
       }}>
       <Tabs.Screen
         name="index"
