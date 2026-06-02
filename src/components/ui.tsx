@@ -15,7 +15,10 @@ export function BackHeader({ title, sub }: { title: string; sub?: string }) {
     <LinearGradient colors={Gradients.hero} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={hdr.grad}>
       <SafeAreaView edges={['top']}>
         <View style={hdr.row}>
-          <Pressable style={hdr.back} onPress={() => router.back()} hitSlop={8}>
+          <Pressable
+            style={hdr.back}
+            onPress={() => (router.canGoBack() ? router.back() : router.replace('/(tabs)'))}
+            hitSlop={8}>
             <Ionicons name="chevron-back" size={22} color="#fff" />
           </Pressable>
           <View style={{ flex: 1 }}>
