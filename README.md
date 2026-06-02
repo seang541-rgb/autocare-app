@@ -1,56 +1,56 @@
-# Welcome to your Expo app 👋
+# AutoCare 🚗
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+汽车养护一站式预约 App（DEMO）—— 参考马来西亚 KeyAuto WeK4U，聚焦**洗车下单完整闭环**。
 
-## Get started
+使用 Expo (React Native) + TypeScript 构建，渐变设计 + 矢量图标，纯前端模拟数据。
 
-1. Install dependencies
+## ✨ 功能
 
-   ```bash
-   npm install
-   ```
+- **首页**：渐变英雄区、套餐进度、促销轮播、服务宫格、附近门店、通知弹窗
+- **洗车下单闭环**：套餐详情（选车型 + 加购）→ 确认订单（门店/时段/支付方式）→ 模拟支付 → 支付成功 → 订单二维码 → 模拟扫码核销
+- **促销详情页**：月卡 / RM1 体验 / 车险续保，各自独立详情，可下单
+- **订单管理**：进行中 / 已完成、订单详情、二维码核销、改期
+- **我的**：会员卡、车辆、积分、菜单
 
-2. Start the app
+## 🛠 技术栈
 
-   ```bash
-   npx expo start
-   ```
+| 类别 | 技术 |
+|---|---|
+| 框架 | Expo SDK 56 · React Native 0.85 |
+| 路由 | expo-router（文件式路由 + 堆栈） |
+| 语言 | TypeScript |
+| UI | expo-linear-gradient · @expo/vector-icons · react-native-qrcode-svg |
+| 状态 | React Context（订单 / Toast） |
 
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## 🚀 本地运行
 
 ```bash
-npm run reset-project
+npm install
+npm start        # 扫码用 Expo Go 真机预览
+npm run web      # 浏览器预览
+npm run android  # Android
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## 📦 打包 APK
 
-### Other setup steps
+```bash
+npx eas build -p android --profile preview
+```
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+## 📁 结构
 
-## Learn more
+```
+src/
+├── app/                    # 路由（文件即页面）
+│   ├── (tabs)/             # 底部 4 个 Tab
+│   ├── service/[id].tsx    # 套餐详情
+│   ├── confirm.tsx         # 确认订单 + 支付
+│   ├── success.tsx         # 支付成功
+│   ├── order/[id].tsx      # 订单详情 + 二维码 + 改期
+│   └── promo/[id].tsx      # 促销详情
+├── components/ui.tsx       # 通用组件
+├── constants/              # 设计系统 + 模拟数据
+└── store/                  # 全局状态（订单 / Toast）
+```
 
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+> DEMO 阶段，纯前端模拟数据，未接后端。
