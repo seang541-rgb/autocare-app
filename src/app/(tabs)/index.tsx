@@ -94,7 +94,7 @@ export default function HomeScreen() {
           </View>
           <View style={styles.grid}>
             {services.map((s) => (
-              <Pressable key={s.id} style={styles.tile} onPress={() => router.push('/booking')}>
+              <Pressable key={s.id} style={styles.tile} onPress={() => router.push({ pathname: '/service/[id]', params: { id: s.id } })}>
                 <GradIcon icon={s.icon} grad={s.grad} size={40} iconSize={19} />
                 <Text style={styles.tileName}>{s.name}</Text>
                 <Text style={styles.tileDesc} numberOfLines={1}>{s.desc}</Text>

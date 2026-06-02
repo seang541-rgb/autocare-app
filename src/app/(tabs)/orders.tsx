@@ -1,12 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Badge, Card, GradIcon } from '@/components/ui';
 import { Brand, Gradients, Radius } from '@/constants/brand';
-import { orders } from '@/constants/data';
+import { useOrders } from '@/store/orders';
 
 const TABS = [
   { key: 'upcoming', label: '进行中' },
@@ -15,7 +16,10 @@ const TABS = [
 
 export default function OrdersScreen() {
   const [tab, setTab] = useState<'upcoming' | 'done'>('upcoming');
-  const list = useMemo(() => orders.filter((o) => o.status === tab), [tab]);
+  const { list: all } = useOrders();
+  const list = useMemo(() => all.filter((o) => o.status === tab), [all, tab]);
+
+  const openDetail = (id: string) => router.push({ pathname: '/order/[id]', params: { id } });
 
   return (
     <View style={styles.root}>
@@ -46,7 +50,8 @@ export default function OrdersScreen() {
           </View>
         ) : (
           list.map((o) => (
-            <Card key={o.id} style={{ marginBottom: 12 }}>
+            <Pressable key={o.id} onPress={() => openDetail(o.id)}>
+            <Card style={{ marginBottom: 12 }}>
               <View style={styles.cardTop}>
                 <GradIcon icon={o.icon} grad={o.grad} size={46} iconSize={22} />
                 <View style={{ flex: 1 }}>
@@ -77,14 +82,14 @@ export default function OrdersScreen() {
                       <Ionicons name="calendar-outline" size={15} color={Brand.text} />
                       <Text style={styles.btnGhostText}>改期</Text>
                     </Pressable>
-                    <Pressable style={[styles.btn, styles.btnPrimary]}>
+                    <Pressable style={[styles.btn, styles.btnPrimary]} onPress={() => openDetail(o.id)}>
                       <Ionicons name="qr-code-outline" size={15} color="#fff" />
                       <Text style={styles.btnPrimaryText}>核销二维码</Text>
                     </Pressable>
                   </>
                 ) : (
                   <>
-                    <Pressable style={[styles.btn, styles.btnGhost]}>
+                    <Pressable style={[styles.btn, styles.btnGhost]} onPress={() => openDetail(o.id)}>
                       <Ionicons name="star-outline" size={15} color={Brand.text} />
                       <Text style={styles.btnGhostText}>评价</Text>
                     </Pressable>
@@ -96,6 +101,7 @@ export default function OrdersScreen() {
                 )}
               </View>
             </Card>
+            </Pressable>
           ))
         )}
         <View style={{ height: 12 }} />

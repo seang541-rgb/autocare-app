@@ -1,11 +1,32 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
 import { ReactNode } from 'react';
-import { StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
+import { Pressable, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Brand, Gradients, Radius, Shadow } from '@/constants/brand';
 
 type IconName = keyof typeof Ionicons.glyphMap;
+
+/** 子页面渐变返回头 */
+export function BackHeader({ title, sub }: { title: string; sub?: string }) {
+  return (
+    <LinearGradient colors={Gradients.hero} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={hdr.grad}>
+      <SafeAreaView edges={['top']}>
+        <View style={hdr.row}>
+          <Pressable style={hdr.back} onPress={() => router.back()} hitSlop={8}>
+            <Ionicons name="chevron-back" size={22} color="#fff" />
+          </Pressable>
+          <View style={{ flex: 1 }}>
+            <Text style={hdr.title}>{title}</Text>
+            {sub ? <Text style={hdr.sub}>{sub}</Text> : null}
+          </View>
+        </View>
+      </SafeAreaView>
+    </LinearGradient>
+  );
+}
 
 export function Card({ children, style }: { children: ReactNode; style?: StyleProp<ViewStyle> }) {
   return <View style={[styles.card, style]}>{children}</View>;
@@ -89,4 +110,12 @@ const styles = StyleSheet.create({
   sectionAction: { fontSize: 12, color: Brand.primary, fontWeight: '700' },
   badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: Radius.pill, alignSelf: 'flex-start' },
   badgeText: { fontSize: 11, fontWeight: '800' },
+});
+
+const hdr = StyleSheet.create({
+  grad: { borderBottomLeftRadius: 24, borderBottomRightRadius: 24 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 12, paddingTop: 6, paddingBottom: 16 },
+  back: { width: 38, height: 38, borderRadius: 19, backgroundColor: 'rgba(255,255,255,0.12)', alignItems: 'center', justifyContent: 'center' },
+  title: { fontSize: 18, fontWeight: '900', color: '#fff' },
+  sub: { fontSize: 12, color: 'rgba(255,255,255,0.62)', marginTop: 2 },
 });
