@@ -11,6 +11,7 @@ type OrderStore = {
   list: LiveOrder[];
   addOrder: (o: Omit<Order, 'id' | 'status'>) => LiveOrder;
   redeem: (id: string) => void;          // 核销（待到店 → 已完成）
+  reschedule: (id: string, date: string, time: string) => void; // 改期
   getById: (id: string) => LiveOrder | undefined;
 };
 
@@ -36,6 +37,8 @@ export function OrderProvider({ children }: { children: ReactNode }) {
       },
       redeem: (id) =>
         setList((prev) => prev.map((x) => (x.id === id ? { ...x, status: 'done' } : x))),
+      reschedule: (id, date, time) =>
+        setList((prev) => prev.map((x) => (x.id === id ? { ...x, date, time } : x))),
       getById: (id) => list.find((x) => x.id === id),
     }),
     [list],

@@ -74,7 +74,7 @@ export default function HomeScreen() {
         {/* 促销横滑 */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 16 }} contentContainerStyle={{ gap: 10, paddingHorizontal: 16 }}>
           {promos.map((p) => (
-            <Pressable key={p.id} onPress={goWash}>
+            <Pressable key={p.id} onPress={() => router.push({ pathname: '/promo/[id]', params: { id: p.id } })}>
               <LinearGradient
                 colors={Gradients[p.grad]}
                 start={{ x: 0, y: 0 }}

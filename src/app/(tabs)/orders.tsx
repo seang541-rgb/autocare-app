@@ -8,7 +8,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Badge, Card, GradIcon } from '@/components/ui';
 import { Brand, Gradients, Radius } from '@/constants/brand';
 import { useOrders } from '@/store/orders';
-import { useToast } from '@/store/toast';
 
 const TABS = [
   { key: 'upcoming', label: '进行中' },
@@ -19,7 +18,6 @@ export default function OrdersScreen() {
   const [tab, setTab] = useState<'upcoming' | 'done'>('upcoming');
   const { list: all } = useOrders();
   const list = useMemo(() => all.filter((o) => o.status === tab), [all, tab]);
-  const toast = useToast();
 
   const openDetail = (id: string) => router.push({ pathname: '/order/[id]', params: { id } });
 
@@ -80,7 +78,7 @@ export default function OrdersScreen() {
               <View style={styles.actions}>
                 {o.status === 'upcoming' ? (
                   <>
-                    <Pressable style={[styles.btn, styles.btnGhost]} onPress={() => toast('改期功能开发中，敬请期待')}>
+                    <Pressable style={[styles.btn, styles.btnGhost]} onPress={() => openDetail(o.id)}>
                       <Ionicons name="calendar-outline" size={15} color={Brand.text} />
                       <Text style={styles.btnGhostText}>改期</Text>
                     </Pressable>

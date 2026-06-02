@@ -44,12 +44,41 @@ export type Promo = {
   tag: string;
   grad: 'promo1' | 'promo2' | 'promo3';
   icon: IconName;
+  // 详情页内容
+  fullTitle: string;
+  price: number;          // 优惠价
+  originalPrice?: number; // 原价（划线）
+  unit: string;           // 价格单位，如 /月、/次
+  ctaText: string;        // 按钮文案
+  bullets: string[];      // 卖点列表
+  terms: string[];        // 使用条款
+  // 购买后走哪个下单流程（洗车）；车险类用 null = 仅展示+toast
+  bookServiceId: 'wash' | null;
+  bookPrice?: number;     // 进下单时锁定的价格
 };
 
 export const promos: Promo[] = [
-  { id: 'p1', title: 'RM50 / 月\n无限洗', sub: '大车小车 一视同车', tag: '本月热卖', grad: 'promo1', icon: 'water' },
-  { id: 'p2', title: 'RM1\n体验洗车', sub: '半夜也能洗', tag: '新客限定', grad: 'promo2', icon: 'moon' },
-  { id: 'p3', title: '车险续保\n最高省 30%', sub: 'KeyPlus 多家比价', tag: '免息分期', grad: 'promo3', icon: 'shield-checkmark' },
+  {
+    id: 'p1', title: 'RM50 / 月\n无限洗', sub: '大车小车 一视同车', tag: '本月热卖', grad: 'promo1', icon: 'water',
+    fullTitle: '月卡 · 本月无限洗', price: 50, originalPrice: 144, unit: '/月', ctaText: '立即开通月卡',
+    bullets: ['当月不限次数自动洗车', '大车小车一个价，不加价', '每次含高压冲洗+泡沫+风干', '专属会员快速通道'],
+    terms: ['有效期：开通起 30 天', '限本人车辆使用', '到店出示会员二维码核销', '不可转让、不退款'],
+    bookServiceId: 'wash', bookPrice: 50,
+  },
+  {
+    id: 'p2', title: 'RM1\n体验洗车', sub: '半夜也能洗', tag: '新客限定', grad: 'promo2', icon: 'moon',
+    fullTitle: 'RM1 新客体验洗车', price: 1, originalPrice: 12, unit: '/次', ctaText: 'RM1 抢购',
+    bullets: ['仅限新用户首单', '24 小时门店，半夜也能洗', '标准自动洗车一次', '含免费内部吸尘'],
+    terms: ['每个新账号限购 1 次', '需在 7 天内到店使用', '到店出示订单二维码', '不与其他优惠同享'],
+    bookServiceId: 'wash', bookPrice: 1,
+  },
+  {
+    id: 'p3', title: '车险续保\n最高省 30%', sub: 'KeyPlus 多家比价', tag: '免息分期', grad: 'promo3', icon: 'shield-checkmark',
+    fullTitle: '车险续保 · 多家比价', price: 0, unit: '', ctaText: '免费获取报价',
+    bullets: ['一次填写，多家保险公司比价', '最高可省 30% 保费', '支持 0 利息分期付款', '专人协助理赔'],
+    terms: ['报价免费，无需承诺购买', '以保险公司最终核价为准', '需提供车辆与证件信息'],
+    bookServiceId: null,
+  },
 ];
 
 export type Order = {

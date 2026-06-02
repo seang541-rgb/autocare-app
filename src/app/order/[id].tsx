@@ -2,18 +2,31 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 
 import { BackHeader, Card } from '@/components/ui';
 import { Brand, Gradients, Radius, Shadow } from '@/constants/brand';
+import { dates, timeSlots } from '@/constants/data';
 import { useOrders } from '@/store/orders';
+import { useToast } from '@/store/toast';
 
 export default function OrderDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { getById, redeem } = useOrders();
+  const { getById, redeem, reschedule } = useOrders();
   const order = getById(String(id));
+  const toast = useToast();
   const [confirming, setConfirming] = useState(false);
+  const [reschedOpen, setReschedOpen] = useState(false);
+  const [rDate, setRDate] = useState(0);
+  const [rSlot, setRSlot] = useState('14:30');
+
+  function applyReschedule() {
+    const d = dates[rDate];
+    reschedule(String(id), `2026-06-${d.day}`, rSlot);
+    setReschedOpen(false);
+    toast('改期成功');
+  }
 
   if (!order) {
     return (
@@ -88,13 +101,17 @@ export default function OrderDetail() {
         <View style={{ height: 20 }} />
       </ScrollView>
 
-      {/* 底部：模拟核销（DEMO 用，展示闭环） */}
+      {/* 底部：改期 + 模拟核销（DEMO 用，展示闭环） */}
       {!done && (
         <View style={styles.footer}>
+          <Pressable onPress={() => setReschedOpen(true)} style={styles.reschedBtn}>
+            <Ionicons name="calendar-outline" size={16} color={Brand.text} />
+            <Text style={styles.reschedText}>改期</Text>
+          </Pressable>
           <Pressable onPress={doRedeem} disabled={confirming} style={{ flex: 1 }}>
             <LinearGradient colors={Gradients.brand} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={[styles.cta, confirming && { opacity: 0.7 }]}>
               <Ionicons name="scan" size={18} color="#fff" />
-              <Text style={styles.ctaText}>{confirming ? '核销中…' : '模拟员工扫码核销'}</Text>
+              <Text style={styles.ctaText}>{confirming ? '核销中…' : '模拟扫码核销'}</Text>
             </LinearGradient>
           </Pressable>
         </View>
@@ -108,6 +125,54 @@ export default function OrderDetail() {
           </Pressable>
         </View>
       )}
+
+      {/* 改期弹窗 */}
+      <Modal visible={reschedOpen} transparent animationType="slide" onRequestClose={() => setReschedOpen(false)}>
+        <Pressable style={styles.sheetBg} onPress={() => setReschedOpen(false)}>
+          <Pressable style={styles.sheet} onPress={() => {}}>
+            <View style={styles.sheetHandle} />
+            <Text style={styles.sheetTitle}>选择新的日期与时段</Text>
+
+            <Text style={styles.sheetLabel}>日期</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10 }}>
+              {dates.map((dd, i) => {
+                const on = i === rDate;
+                return on ? (
+                  <Pressable key={i} onPress={() => setRDate(i)}>
+                    <LinearGradient colors={Gradients.brand} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} style={styles.dateChip}>
+                      <Text style={[styles.dateWeek, { color: '#fff' }]}>{dd.label || dd.week}</Text>
+                      <Text style={[styles.dateDay, { color: '#fff' }]}>{dd.day}</Text>
+                    </LinearGradient>
+                  </Pressable>
+                ) : (
+                  <Pressable key={i} onPress={() => setRDate(i)} style={styles.dateChip}>
+                    <Text style={styles.dateWeek}>{dd.label || dd.week}</Text>
+                    <Text style={styles.dateDay}>{dd.day}</Text>
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+
+            <Text style={styles.sheetLabel}>时段</Text>
+            <View style={styles.slotGrid}>
+              {timeSlots.map((t) => {
+                const on = t === rSlot;
+                return (
+                  <Pressable key={t} onPress={() => setRSlot(t)} style={[styles.slot, on && styles.slotOn]}>
+                    <Text style={[styles.slotText, on && { color: '#fff', fontWeight: '800' }]}>{t}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+
+            <Pressable onPress={applyReschedule} style={{ marginTop: 18 }}>
+              <LinearGradient colors={Gradients.brand} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.sheetCta}>
+                <Text style={styles.ctaText}>确认改期</Text>
+              </LinearGradient>
+            </Pressable>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -153,4 +218,20 @@ const styles = StyleSheet.create({
   ctaText: { color: '#fff', fontSize: 16, fontWeight: '800' },
   ctaGhost: { alignItems: 'center', paddingVertical: 15, borderRadius: Radius.pill, backgroundColor: Brand.bg },
   ctaGhostText: { color: Brand.text, fontSize: 15, fontWeight: '700' },
+  reschedBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 18, paddingVertical: 15, borderRadius: Radius.pill, backgroundColor: Brand.bg, marginRight: 10 },
+  reschedText: { color: Brand.text, fontSize: 14, fontWeight: '700' },
+  // 改期弹窗
+  sheetBg: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
+  sheet: { backgroundColor: '#fff', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20, paddingBottom: Platform.OS === 'ios' ? 36 : 24 },
+  sheetHandle: { width: 40, height: 4, borderRadius: 2, backgroundColor: Brand.border, alignSelf: 'center', marginBottom: 16 },
+  sheetTitle: { fontSize: 17, fontWeight: '900', color: Brand.text, marginBottom: 8 },
+  sheetLabel: { fontSize: 13, fontWeight: '800', color: Brand.text, marginTop: 16, marginBottom: 10 },
+  dateChip: { width: 60, paddingVertical: 12, borderRadius: Radius.md, backgroundColor: Brand.bg, alignItems: 'center', gap: 3 },
+  dateWeek: { fontSize: 11, color: Brand.textSub, fontWeight: '700' },
+  dateDay: { fontSize: 17, fontWeight: '900', color: Brand.text },
+  slotGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  slot: { width: '22%', flexGrow: 1, paddingVertical: 11, borderRadius: Radius.md, backgroundColor: Brand.bg, borderWidth: 1.5, borderColor: Brand.border, alignItems: 'center' },
+  slotOn: { backgroundColor: Brand.primary, borderColor: Brand.primary },
+  slotText: { fontSize: 13, color: Brand.text, fontWeight: '700' },
+  sheetCta: { alignItems: 'center', paddingVertical: 15, borderRadius: Radius.pill },
 });
