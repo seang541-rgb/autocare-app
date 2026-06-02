@@ -69,7 +69,7 @@ export default function HomeScreen() {
         </View>
 
         {/* 促销横滑 */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 12, paddingHorizontal: 16 }}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 16 }} contentContainerStyle={{ gap: 10, paddingHorizontal: 16 }}>
           {promos.map((p) => (
             <LinearGradient
               key={p.id}
@@ -89,13 +89,13 @@ export default function HomeScreen() {
 
         <View style={styles.body}>
           {/* 服务宫格 2x2 */}
-          <View style={{ marginTop: 22 }}>
+          <View style={{ marginTop: 16 }}>
             <SectionTitle title="选择服务" />
           </View>
           <View style={styles.grid}>
             {services.map((s) => (
               <Pressable key={s.id} style={styles.tile} onPress={() => router.push('/booking')}>
-                <GradIcon icon={s.icon} grad={s.grad} size={46} iconSize={22} />
+                <GradIcon icon={s.icon} grad={s.grad} size={40} iconSize={19} />
                 <Text style={styles.tileName}>{s.name}</Text>
                 <Text style={styles.tileDesc} numberOfLines={1}>{s.desc}</Text>
                 <View style={styles.tileFootRow}>
@@ -107,7 +107,7 @@ export default function HomeScreen() {
           </View>
 
           {/* 附近门店 */}
-          <View style={{ marginTop: 22 }}>
+          <View style={{ marginTop: 16 }}>
             <SectionTitle title="附近门店" action="查看全部" />
           </View>
         </View>
@@ -167,46 +167,46 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Brand.bg },
   heroGrad: { borderBottomLeftRadius: 28, borderBottomRightRadius: 28 },
-  heroPad: { paddingHorizontal: 16, paddingBottom: 22 },
+  heroPad: { paddingHorizontal: 16, paddingBottom: 18 },
   topBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingTop: 8 },
   locLabel: { fontSize: 11, color: Brand.textOnDarkSub },
   locRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 },
   locValue: { fontSize: 14, fontWeight: '700', color: '#fff' },
   bell: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.1)', alignItems: 'center', justifyContent: 'center' },
   dot: { position: 'absolute', top: 9, right: 10, width: 8, height: 8, borderRadius: 4, backgroundColor: Brand.primary, borderWidth: 1.5, borderColor: Brand.navy },
-  hello: { fontSize: 21, fontWeight: '900', color: '#fff', marginTop: 16 },
-  subHello: { fontSize: 13, color: Brand.textOnDarkSub, marginTop: 3 },
+  hello: { fontSize: 19, fontWeight: '900', color: '#fff', marginTop: 12 },
+  subHello: { fontSize: 12, color: Brand.textOnDarkSub, marginTop: 2 },
   search: {
     flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: '#fff',
-    borderRadius: Radius.pill, paddingHorizontal: 16, paddingVertical: 13, marginTop: 16, ...Shadow.soft,
+    borderRadius: Radius.pill, paddingHorizontal: 14, paddingVertical: 11, marginTop: 12, ...Shadow.soft,
   },
   searchPh: { color: Brand.textSub, fontSize: 13 },
   scroll: { paddingTop: 0 },
   body: { paddingHorizontal: 16 },
   // 套餐
-  pkg: { borderRadius: Radius.lg, padding: 18, marginTop: -16, ...Shadow.soft },
+  pkg: { borderRadius: Radius.lg, padding: 14, marginTop: -14, ...Shadow.soft },
   pkgRow: { flexDirection: 'row', alignItems: 'flex-start' },
-  pkgLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 12, fontWeight: '600' },
-  pkgBig: { color: '#fff', fontSize: 30, fontWeight: '900', marginTop: 2 },
-  pkgBigSub: { fontSize: 14, fontWeight: '700', color: 'rgba(255,255,255,0.8)' },
-  pkgBadge: { flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: 'rgba(255,255,255,0.22)', paddingHorizontal: 9, paddingVertical: 4, borderRadius: Radius.pill },
-  pkgBadgeText: { color: '#fff', fontSize: 11, fontWeight: '800' },
-  pkgBarBg: { height: 7, borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.25)', marginTop: 14, overflow: 'hidden' },
-  pkgBarFill: { height: 7, borderRadius: 4, backgroundColor: '#fff' },
-  pkgHint: { color: 'rgba(255,255,255,0.8)', fontSize: 11, marginTop: 10 },
+  pkgLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 11, fontWeight: '600' },
+  pkgBig: { color: '#fff', fontSize: 24, fontWeight: '900', marginTop: 1 },
+  pkgBigSub: { fontSize: 13, fontWeight: '700', color: 'rgba(255,255,255,0.8)' },
+  pkgBadge: { flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: 'rgba(255,255,255,0.22)', paddingHorizontal: 8, paddingVertical: 3, borderRadius: Radius.pill },
+  pkgBadgeText: { color: '#fff', fontSize: 10, fontWeight: '800' },
+  pkgBarBg: { height: 6, borderRadius: 3, backgroundColor: 'rgba(255,255,255,0.25)', marginTop: 10, overflow: 'hidden' },
+  pkgBarFill: { height: 6, borderRadius: 3, backgroundColor: '#fff' },
+  pkgHint: { color: 'rgba(255,255,255,0.8)', fontSize: 10, marginTop: 7 },
   // 促销
-  promo: { width: 230, borderRadius: Radius.lg, padding: 18, minHeight: 130, overflow: 'hidden', ...Shadow.card },
-  promoTag: { alignSelf: 'flex-start', backgroundColor: 'rgba(255,255,255,0.25)', paddingHorizontal: 9, paddingVertical: 3, borderRadius: Radius.pill, marginBottom: 10 },
-  promoTagText: { color: '#fff', fontSize: 10, fontWeight: '800' },
-  promoTitle: { color: '#fff', fontSize: 21, fontWeight: '900', lineHeight: 25 },
-  promoSub: { color: 'rgba(255,255,255,0.9)', fontSize: 12, marginTop: 6 },
-  promoGhost: { position: 'absolute', right: -6, bottom: -6 },
+  promo: { width: 190, borderRadius: Radius.lg, padding: 14, minHeight: 104, overflow: 'hidden', ...Shadow.card },
+  promoTag: { alignSelf: 'flex-start', backgroundColor: 'rgba(255,255,255,0.25)', paddingHorizontal: 8, paddingVertical: 2, borderRadius: Radius.pill, marginBottom: 8 },
+  promoTagText: { color: '#fff', fontSize: 9, fontWeight: '800' },
+  promoTitle: { color: '#fff', fontSize: 17, fontWeight: '900', lineHeight: 21 },
+  promoSub: { color: 'rgba(255,255,255,0.9)', fontSize: 11, marginTop: 4 },
+  promoGhost: { position: 'absolute', right: -8, bottom: -8 },
   // 服务宫格
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
-  tile: { width: '47%', flexGrow: 1, backgroundColor: Brand.card, borderRadius: Radius.lg, padding: 14, ...Shadow.card },
-  tileName: { fontSize: 16, fontWeight: '800', color: Brand.text, marginTop: 12 },
-  tileDesc: { fontSize: 11, color: Brand.textSub, marginTop: 3 },
-  tileFootRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  tile: { width: '47%', flexGrow: 1, backgroundColor: Brand.card, borderRadius: Radius.md, padding: 12, ...Shadow.card },
+  tileName: { fontSize: 14, fontWeight: '800', color: Brand.text, marginTop: 8 },
+  tileDesc: { fontSize: 10, color: Brand.textSub, marginTop: 2 },
+  tileFootRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 8 },
   tileFrom: { fontSize: 13, fontWeight: '800', color: Brand.primary },
   // 门店
   outlet: { width: 180, padding: 12 },
