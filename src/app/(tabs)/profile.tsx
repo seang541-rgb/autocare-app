@@ -11,14 +11,14 @@ import { useToast } from '@/store/toast';
 
 type IconName = keyof typeof Ionicons.glyphMap;
 
-const MENU: { icon: IconName; label: string; sub: string }[] = [
-  { icon: 'car-sport-outline', label: '我的车辆', sub: profile.car.plate },
-  { icon: 'ticket-outline', label: '优惠券', sub: `${profile.coupons} 张可用` },
-  { icon: 'card-outline', label: '支付方式', sub: 'TnG · FPX · Card' },
-  { icon: 'location-outline', label: '地址管理', sub: '' },
-  { icon: 'logo-whatsapp', label: 'WhatsApp / AI 客服', sub: '预约、付款、投诉' },
-  { icon: 'alert-circle-outline', label: '投诉中心', sub: '服务问题跟进' },
-  { icon: 'settings-outline', label: '设置', sub: '' },
+const MENU: { icon: IconName; labelKey: string; subKey?: string; sub?: string }[] = [
+  { icon: 'car-sport-outline', labelKey: 'myVehicles', sub: profile.car.plate },
+  { icon: 'ticket-outline', labelKey: 'coupons', subKey: 'availableCoupons' },
+  { icon: 'card-outline', labelKey: 'paymentMethods', sub: 'TnG · FPX · Card' },
+  { icon: 'location-outline', labelKey: 'addressBook' },
+  { icon: 'logo-whatsapp', labelKey: 'whatsappAiCare', subKey: 'supportMenuSub' },
+  { icon: 'alert-circle-outline', labelKey: 'complaintCenter', subKey: 'complaintMenuSub' },
+  { icon: 'settings-outline', labelKey: 'settings' },
 ];
 
 const LANGS: { key: Language; labelKey: string }[] = [
@@ -58,11 +58,11 @@ export default function ProfileScreen() {
 
         <View style={styles.body}>
           <Card style={styles.statsCard}>
-            <Stat num={profile.points} label="积分" />
+            <Stat num={profile.points} label={t('points')} />
             <View style={styles.statDiv} />
-            <Stat num={profile.packageLeft} label="剩余洗车" />
+            <Stat num={profile.packageLeft} label={t('remainingWash')} />
             <View style={styles.statDiv} />
-            <Stat num={profile.coupons} label="优惠券" />
+            <Stat num={profile.coupons} label={t('coupons')} />
           </Card>
 
           <Card style={{ marginTop: 14 }}>
@@ -79,7 +79,7 @@ export default function ProfileScreen() {
             </View>
           </Card>
 
-          <Pressable onPress={() => toast('车辆管理开发中')}>
+          <Pressable onPress={() => toast(t('vehicleToast'))}>
             <Card style={{ marginTop: 14 }}>
               <View style={styles.carRow}>
                 <GradIcon icon="car-sport" grad="brand" size={48} iconSize={24} />
@@ -93,19 +93,22 @@ export default function ProfileScreen() {
           </Pressable>
 
           <Card style={{ marginTop: 14, paddingVertical: 4 }}>
-            {MENU.map((m, i) => (
-              <Pressable key={m.label} onPress={() => toast(`${m.label}：Demo 功能已接入入口`)}>
+            {MENU.map((m, i) => {
+              const label = t(m.labelKey);
+              const sub = m.subKey ? t(m.subKey, { count: profile.coupons }) : m.sub;
+              return (
+              <Pressable key={m.labelKey} onPress={() => toast(t('demoEntryToast', { label }))}>
                 <View style={[styles.menuRow, i < MENU.length - 1 && styles.menuBorder]}>
                   <View style={styles.menuIconWrap}>
                     <Ionicons name={m.icon} size={19} color={Brand.primary} />
                   </View>
-                  <Text style={styles.menuLabel}>{m.label}</Text>
+                  <Text style={styles.menuLabel}>{label}</Text>
                   <View style={{ flex: 1 }} />
-                  {m.sub ? <Text style={styles.menuSub}>{m.sub}</Text> : null}
+                  {sub ? <Text style={styles.menuSub}>{sub}</Text> : null}
                   <Ionicons name="chevron-forward" size={18} color={Brand.textSub} />
                 </View>
               </Pressable>
-            ))}
+            )})}
           </Card>
 
           <Text style={styles.version}>{AppBrand.name} v0.4 · Malaysia-ready</Text>

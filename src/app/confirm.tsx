@@ -1,23 +1,25 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { BackHeader, Card } from '@/components/ui';
 import { Brand, Gradients, Radius, Shadow } from '@/constants/brand';
 import { dates, outlets, timeSlots } from '@/constants/data';
+import { useI18n } from '@/store/i18n';
 import { useOrders } from '@/store/orders';
 
-const pays = [
-  { id: 'tng', name: "Touch 'n Go eWallet", icon: 'wallet-outline' as const },
-  { id: 'card', name: '信用卡 / 借记卡', icon: 'card-outline' as const },
-  { id: 'fpx', name: 'FPX 网上银行', icon: 'business-outline' as const },
+const payIds = [
+  { id: 'tng', icon: 'wallet-outline' as const },
+  { id: 'card', icon: 'card-outline' as const },
+  { id: 'fpx', icon: 'business-outline' as const },
 ];
 
 export default function Confirm() {
-  const p = useLocalSearchParams<{ service: string; icon: string; grad: string; addons: string; price: string }>();
+  const p = useLocalSearchParams<{ service: string; icon: string; grad: keyof typeof Gradients; addons: string; price: string }>();
   const { addOrder } = useOrders();
+  const { t, outletName, dateLabel } = useI18n();
 
   const [outletId, setOutletId] = useState(outlets[0].id);
   const [dateIdx, setDateIdx] = useState(0);
@@ -28,16 +30,23 @@ export default function Confirm() {
   const outlet = outlets.find((o) => o.id === outletId)!;
   const d = dates[dateIdx];
   const price = Number(p.price ?? 0);
+  const pays = useMemo(
+    () => [
+      { ...payIds[0], name: "Touch 'n Go eWallet" },
+      { ...payIds[1], name: t('cardDebit') },
+      { ...payIds[2], name: t('fpxBank') },
+    ],
+    [t],
+  );
 
   function payNow() {
     setPaying(true);
-    // 模拟支付
     setTimeout(() => {
       const order = addOrder({
-        service: p.service ?? '洗车',
+        service: p.service ?? t('booking'),
         icon: (p.icon as any) ?? 'water',
         grad: (p.grad as any) ?? 'wash',
-        outlet: outlet.name,
+        outlet: outletName(outlet.id, outlet.name),
         outletId: outlet.id,
         date: `2026-06-${d.day}`,
         time: slot,
@@ -50,22 +59,20 @@ export default function Confirm() {
 
   return (
     <View style={styles.root}>
-      <BackHeader title="确认订单" sub="核对信息后付款" />
+      <BackHeader title={t('confirmOrder')} sub={t('confirmSub')} />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
-        {/* 服务摘要 */}
         <Card style={styles.sumCard}>
-          <LinearGradient colors={Gradients[((p.grad as keyof typeof Gradients) || 'wash')]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.sumIcon}>
+          <LinearGradient colors={Gradients[p.grad || 'wash']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.sumIcon}>
             <Ionicons name={(p.icon as any) ?? 'water'} size={24} color="#fff" />
           </LinearGradient>
           <View style={{ flex: 1 }}>
             <Text style={styles.sumTitle}>{p.service}</Text>
-            <Text style={styles.sumSub}>加购：{p.addons}</Text>
+            <Text style={styles.sumSub}>{t('addOnPrefix', { addons: p.addons ?? t('none') })}</Text>
           </View>
         </Card>
 
-        {/* 门店 */}
-        <Text style={styles.section}>门店</Text>
+        <Text style={styles.section}>{t('outlet')}</Text>
         <View style={{ gap: 10 }}>
           {outlets.map((o) => {
             const on = o.id === outletId;
@@ -74,7 +81,7 @@ export default function Confirm() {
                 <Card style={[styles.row, on && { borderWidth: 2, borderColor: Brand.primary }]}>
                   <Ionicons name="storefront" size={20} color={on ? Brand.primary : Brand.textSub} />
                   <View style={{ flex: 1 }}>
-                    <Text style={styles.rowName}>{o.name}</Text>
+                    <Text style={styles.rowName}>{outletName(o.id, o.name)}</Text>
                     <Text style={styles.rowMeta}>{o.distanceKm}km · {o.open}</Text>
                   </View>
                   <View style={[styles.radio, on && styles.radioOn]}>{on && <Ionicons name="checkmark" size={12} color="#fff" />}</View>
@@ -84,42 +91,40 @@ export default function Confirm() {
           })}
         </View>
 
-        {/* 日期 */}
-        <Text style={styles.section}>日期</Text>
+        <Text style={styles.section}>{t('date')}</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10 }}>
           {dates.map((dd, i) => {
             const on = i === dateIdx;
+            const label = dateLabel(dd.label, dd.week);
             return on ? (
               <Pressable key={i} onPress={() => setDateIdx(i)}>
                 <LinearGradient colors={Gradients.brand} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} style={styles.dateChip}>
-                  <Text style={[styles.dateWeek, { color: '#fff' }]}>{dd.label || dd.week}</Text>
+                  <Text style={[styles.dateWeek, { color: '#fff' }]}>{label}</Text>
                   <Text style={[styles.dateDay, { color: '#fff' }]}>{dd.day}</Text>
                 </LinearGradient>
               </Pressable>
             ) : (
               <Pressable key={i} onPress={() => setDateIdx(i)} style={styles.dateChip}>
-                <Text style={styles.dateWeek}>{dd.label || dd.week}</Text>
+                <Text style={styles.dateWeek}>{label}</Text>
                 <Text style={styles.dateDay}>{dd.day}</Text>
               </Pressable>
             );
           })}
         </ScrollView>
 
-        {/* 时段 */}
-        <Text style={styles.section}>时段</Text>
+        <Text style={styles.section}>{t('timeSlot')}</Text>
         <View style={styles.slotGrid}>
-          {timeSlots.map((t) => {
-            const on = t === slot;
+          {timeSlots.map((time) => {
+            const on = time === slot;
             return (
-              <Pressable key={t} onPress={() => setSlot(t)} style={[styles.slot, on && styles.slotOn]}>
-                <Text style={[styles.slotText, on && { color: '#fff', fontWeight: '800' }]}>{t}</Text>
+              <Pressable key={time} onPress={() => setSlot(time)} style={[styles.slot, on && styles.slotOn]}>
+                <Text style={[styles.slotText, on && { color: '#fff', fontWeight: '800' }]}>{time}</Text>
               </Pressable>
             );
           })}
         </View>
 
-        {/* 支付方式 */}
-        <Text style={styles.section}>支付方式</Text>
+        <Text style={styles.section}>{t('paymentMethod')}</Text>
         <View style={{ gap: 10 }}>
           {pays.map((m) => {
             const on = m.id === pay;
@@ -135,19 +140,18 @@ export default function Confirm() {
           })}
         </View>
 
-        {/* 费用明细 */}
         <Card style={{ marginTop: 20 }}>
           <View style={styles.feeRow}>
-            <Text style={styles.feeLabel}>服务费用</Text>
+            <Text style={styles.feeLabel}>{t('serviceFee')}</Text>
             <Text style={styles.feeVal}>RM {price}</Text>
           </View>
           <View style={styles.feeRow}>
-            <Text style={styles.feeLabel}>平台优惠</Text>
+            <Text style={styles.feeLabel}>{t('platformDiscount')}</Text>
             <Text style={[styles.feeVal, { color: Brand.success }]}>- RM 0</Text>
           </View>
           <View style={styles.feeDivider} />
           <View style={styles.feeRow}>
-            <Text style={styles.feeTotalLabel}>应付总额</Text>
+            <Text style={styles.feeTotalLabel}>{t('amountDue')}</Text>
             <Text style={styles.feeTotal}>RM {price}</Text>
           </View>
         </Card>
@@ -155,10 +159,9 @@ export default function Confirm() {
         <View style={{ height: 20 }} />
       </ScrollView>
 
-      {/* 底部支付 */}
       <View style={styles.footer}>
         <View>
-          <Text style={styles.footLabel}>应付</Text>
+          <Text style={styles.footLabel}>{t('amountDue')}</Text>
           <Text style={styles.footPrice}>RM {price}</Text>
         </View>
         <Pressable onPress={payNow} disabled={paying}>
@@ -166,12 +169,12 @@ export default function Confirm() {
             {paying ? (
               <>
                 <ActivityIndicator color="#fff" size="small" />
-                <Text style={styles.ctaText}>支付中…</Text>
+                <Text style={styles.ctaText}>{t('paying')}</Text>
               </>
             ) : (
               <>
                 <Ionicons name="lock-closed" size={16} color="#fff" />
-                <Text style={styles.ctaText}>立即支付</Text>
+                <Text style={styles.ctaText}>{t('payNow')}</Text>
               </>
             )}
           </LinearGradient>
@@ -194,8 +197,8 @@ const styles = StyleSheet.create({
   rowMeta: { fontSize: 11, color: Brand.textSub, marginTop: 3 },
   radio: { width: 22, height: 22, borderRadius: 11, borderWidth: 2, borderColor: Brand.border, alignItems: 'center', justifyContent: 'center' },
   radioOn: { borderColor: Brand.primary, backgroundColor: Brand.primary },
-  dateChip: { width: 62, paddingVertical: 14, borderRadius: Radius.md, backgroundColor: Brand.card, alignItems: 'center', gap: 4, ...Shadow.card },
-  dateWeek: { fontSize: 11, color: Brand.textSub, fontWeight: '700' },
+  dateChip: { width: 72, paddingVertical: 14, borderRadius: Radius.md, backgroundColor: Brand.card, alignItems: 'center', gap: 4, ...Shadow.card },
+  dateWeek: { fontSize: 11, color: Brand.textSub, fontWeight: '700', textAlign: 'center' },
   dateDay: { fontSize: 18, fontWeight: '900', color: Brand.text },
   slotGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   slot: { width: '22%', flexGrow: 1, paddingVertical: 12, borderRadius: Radius.md, backgroundColor: Brand.card, borderWidth: 1.5, borderColor: Brand.border, alignItems: 'center' },

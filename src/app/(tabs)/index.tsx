@@ -14,7 +14,7 @@ import { useToast } from '@/store/toast';
 export default function HomeScreen() {
   const [notifOpen, setNotifOpen] = useState(false);
   const toast = useToast();
-  const { t } = useI18n();
+  const { t, serviceName, serviceDesc, outletName, promoTitle, promoSub, promoDetail, notification } = useI18n();
   const bestOutlet = useMemo(
     () => [...outlets].sort((a, b) => Number(b.openNow) - Number(a.openNow) || a.waitMins - b.waitMins)[0],
     [],
@@ -48,22 +48,22 @@ export default function HomeScreen() {
           <Card style={styles.readyCard}>
             <View style={styles.readyTop}>
               <View>
-                <Text style={styles.eyebrow}>最快可预约</Text>
-                <Text style={styles.readyTitle}>{bestOutlet.name}</Text>
+                <Text style={styles.eyebrow}>{t('fastestBooking')}</Text>
+                <Text style={styles.readyTitle}>{outletName(bestOutlet.id, bestOutlet.name)}</Text>
                 <Text style={styles.readyMeta}>{bestOutlet.area} · {bestOutlet.distanceKm}km · {bestOutlet.open}</Text>
               </View>
-              <Badge text={bestOutlet.openNow ? '营业中' : '休息中'} color={bestOutlet.openNow ? Brand.success : Brand.textSub} soft={bestOutlet.openNow ? Brand.successSoft : Brand.border} />
+              <Badge text={bestOutlet.openNow ? t('openNow') : t('closed')} color={bestOutlet.openNow ? Brand.success : Brand.textSub} soft={bestOutlet.openNow ? Brand.successSoft : Brand.border} />
             </View>
 
             <View style={styles.availability}>
-              <Metric icon="car-sport-outline" label="排队车辆" value={`${bestOutlet.queueCars} 辆`} />
-              <Metric icon="time-outline" label="预计等待" value={`${bestOutlet.waitMins} 分钟`} />
-              <Metric icon="star" label="门店评分" value={bestOutlet.rating.toFixed(1)} />
+              <Metric icon="car-sport-outline" label={t('queueCars')} value={String(bestOutlet.queueCars)} />
+              <Metric icon="time-outline" label={t('estimatedWait')} value={`${bestOutlet.waitMins}m`} />
+              <Metric icon="star" label={t('outletRating')} value={bestOutlet.rating.toFixed(1)} />
             </View>
 
             <Pressable onPress={() => router.push({ pathname: '/service/[id]', params: { id: 'wash' } })}>
               <LinearGradient colors={Gradients.brand} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.primaryCta}>
-                <Text style={styles.primaryCtaText}>立即预约洗车</Text>
+                <Text style={styles.primaryCtaText}>{t('bookWashNow')}</Text>
                 <Ionicons name="arrow-forward" size={18} color="#fff" />
               </LinearGradient>
             </Pressable>
@@ -71,26 +71,26 @@ export default function HomeScreen() {
 
           <View style={styles.packageRow}>
             <View style={{ flex: 1 }}>
-              <Text style={styles.packageLabel}>我的月卡</Text>
-              <Text style={styles.packageValue}>{profile.packageLeft}/{profile.packageTotal} 次可用</Text>
+              <Text style={styles.packageLabel}>{t('myPass')}</Text>
+              <Text style={styles.packageValue}>{t('timesAvailable', { left: profile.packageLeft, total: profile.packageTotal })}</Text>
             </View>
             <View style={styles.packageBar}>
               <View style={[styles.packageFill, { width: `${(profile.packageLeft / profile.packageTotal) * 100}%` }]} />
             </View>
           </View>
 
-          <SectionTitle title="服务分类" />
+          <SectionTitle title={t('serviceCategories')} />
           <View style={styles.serviceGrid}>
             {services.map((service) => (
               <Pressable key={service.id} style={styles.serviceTile} onPress={() => router.push({ pathname: '/service/[id]', params: { id: service.id } })}>
                 <GradIcon icon={service.icon} grad={service.grad} size={38} iconSize={18} />
-                <Text style={styles.serviceName}>{service.name}</Text>
-                <Text style={styles.serviceDesc} numberOfLines={1}>{service.desc}</Text>
+                <Text style={styles.serviceName}>{serviceName(service.id)}</Text>
+                <Text style={styles.serviceDesc} numberOfLines={1}>{serviceDesc(service.id)}</Text>
               </Pressable>
             ))}
           </View>
 
-          <SectionTitle title={t('queueStatus')} action="问 AI 客服" onAction={() => toast('AI 客服：JagaWash 甲洞店最快，预计等 12 分钟。')} />
+          <SectionTitle title={t('mapQueueStatus')} action={t('askAi')} onAction={() => toast(t('aiFastestReply'))} />
           <Card style={styles.mapCard}>
             <View style={styles.mapCanvas}>
               <View style={styles.mapRoadH} />
@@ -105,8 +105,8 @@ export default function HomeScreen() {
               {outlets.map((outlet) => (
                 <View key={outlet.id} style={styles.outletRow}>
                   <View style={{ flex: 1 }}>
-                    <Text style={styles.outletName}>{outlet.name}</Text>
-                    <Text style={styles.outletSub}>{outlet.queueCars} 辆排队 · 等 {outlet.waitMins} 分钟</Text>
+                    <Text style={styles.outletName}>{outletName(outlet.id, outlet.name)}</Text>
+                    <Text style={styles.outletSub}>{outlet.queueCars} · {t('estimatedWait')} {outlet.waitMins}m</Text>
                   </View>
                   <Stars rating={outlet.rating} />
                 </View>
@@ -114,7 +114,7 @@ export default function HomeScreen() {
             </View>
           </Card>
 
-          <SectionTitle title="优惠" />
+          <SectionTitle title={t('promo')} />
         </View>
 
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.hScroll}>
@@ -122,22 +122,22 @@ export default function HomeScreen() {
             <Pressable key={promo.id} onPress={() => router.push({ pathname: '/promo/[id]', params: { id: promo.id } })}>
               <View style={styles.promoCard}>
                 <View style={styles.promoHead}>
-                  <Badge text={promo.tag} color={Brand.primary} soft={Brand.primarySoft} />
+                  <Badge text={promoDetail(promo).tag} color={Brand.primary} soft={Brand.primarySoft} />
                   <Ionicons name={promo.icon} size={22} color={Brand.primary} />
                 </View>
-                <Text style={styles.promoTitle}>{promo.title}</Text>
-                <Text style={styles.promoSub}>{promo.sub}</Text>
+                <Text style={styles.promoTitle}>{promoTitle(promo)}</Text>
+                <Text style={styles.promoSub}>{promoSub(promo)}</Text>
               </View>
             </Pressable>
           ))}
         </ScrollView>
 
         <View style={styles.body}>
-          <Pressable style={styles.aiPanel} onPress={() => toast('AI 客服：可以帮你改期、查排队、提交投诉。')}>
+          <Pressable style={styles.aiPanel} onPress={() => toast(t('aiFastestReply'))}>
             <Ionicons name="logo-whatsapp" size={22} color="#25D366" />
             <View style={{ flex: 1 }}>
               <Text style={styles.aiTitle}>{t('aiCare')}</Text>
-              <Text style={styles.aiSub}>预约提醒、付款通知和投诉跟进都从这里处理。</Text>
+              <Text style={styles.aiSub}>{t('aiPanelBody')}</Text>
             </View>
             <Ionicons name="chevron-forward" size={18} color={Brand.textSub} />
           </Pressable>
@@ -150,20 +150,23 @@ export default function HomeScreen() {
         <Pressable style={styles.modalBg} onPress={() => setNotifOpen(false)}>
           <Pressable style={styles.modalCard} onPress={() => {}}>
             <View style={styles.modalHead}>
-              <Text style={styles.modalTitle}>通知与 WhatsApp</Text>
+              <Text style={styles.modalTitle}>{t('notificationsWhatsapp')}</Text>
               <Pressable onPress={() => setNotifOpen(false)} hitSlop={8}>
                 <Ionicons name="close" size={22} color={Brand.textSub} />
               </Pressable>
             </View>
-            {notifications.map((item) => (
-              <View key={item.id} style={styles.notifItem}>
-                <Ionicons name={item.icon} size={22} color={Brand.primary} />
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.notifTitle}>{item.title}</Text>
-                  <Text style={styles.notifSub}>{item.body}</Text>
+            {notifications.map((item) => {
+              const copy = notification(item.id, item);
+              return (
+                <View key={item.id} style={styles.notifItem}>
+                  <Ionicons name={item.icon} size={22} color={Brand.primary} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.notifTitle}>{copy.title}</Text>
+                    <Text style={styles.notifSub}>{copy.body}</Text>
+                  </View>
                 </View>
-              </View>
-            ))}
+              );
+            })}
           </Pressable>
         </Pressable>
       </Modal>

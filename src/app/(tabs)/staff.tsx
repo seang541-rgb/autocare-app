@@ -13,12 +13,12 @@ import { useToast } from '@/store/toast';
 export default function StaffScreen() {
   const { list, redeem } = useOrders();
   const toast = useToast();
-  const { t } = useI18n();
+  const { t, orderService, outletName } = useI18n();
   const todayList = useMemo(() => list.filter((o) => o.status === 'upcoming'), [list]);
 
   function scanOrder(id: string) {
     redeem(id);
-    toast(`订单 ${id} 已核销，状态更新为已完成`);
+    toast(t('redeemedToast', { id }));
   }
 
   return (
@@ -27,7 +27,7 @@ export default function StaffScreen() {
         <SafeAreaView edges={['top']}>
           <View style={styles.header}>
             <Text style={styles.headerTitle}>{t('staffDesk')}</Text>
-            <Text style={styles.headerSub}>今日预约、扫码核销、订单状态更新</Text>
+            <Text style={styles.headerSub}>{t('staffSub')}</Text>
           </View>
         </SafeAreaView>
       </LinearGradient>
@@ -38,16 +38,16 @@ export default function StaffScreen() {
             <Ionicons name="scan" size={34} color="#fff" />
           </LinearGradient>
           <View style={{ flex: 1 }}>
-            <Text style={styles.scanTitle}>扫码核销</Text>
-            <Text style={styles.scanSub}>Demo 模式：点击订单即可模拟扫码完成服务。</Text>
+            <Text style={styles.scanTitle}>{t('scanRedeem')}</Text>
+            <Text style={styles.scanSub}>{t('staffDemo')}</Text>
           </View>
         </Card>
 
-        <Text style={styles.section}>今日预约列表</Text>
+        <Text style={styles.section}>{t('todayBookings')}</Text>
         {todayList.length === 0 ? (
           <View style={styles.empty}>
             <Ionicons name="checkmark-circle-outline" size={46} color={Brand.success} />
-            <Text style={styles.emptyText}>今日预约都已完成</Text>
+            <Text style={styles.emptyText}>{t('allDoneToday')}</Text>
           </View>
         ) : (
           todayList.map((o) => (
@@ -55,17 +55,17 @@ export default function StaffScreen() {
               <View style={styles.orderTop}>
                 <GradIcon icon={o.icon} grad={o.grad} size={44} iconSize={21} />
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.service}>{o.service}</Text>
-                  <Text style={styles.meta}>{o.outlet} · {o.time}</Text>
+                  <Text style={styles.service}>{orderService(o)}</Text>
+                  <Text style={styles.meta}>{outletName(o.outletId, o.outlet)} · {o.time}</Text>
                 </View>
-                <Badge text="待核销" color={Brand.warn} soft={Brand.warnSoft} />
+                <Badge text={t('pendingRedeem')} color={Brand.warn} soft={Brand.warnSoft} />
               </View>
               <View style={styles.orderFoot}>
                 <Text style={styles.orderId}>{o.id}</Text>
                 <Pressable onPress={() => scanOrder(o.id)}>
                   <LinearGradient colors={Gradients.brand} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.cta}>
                     <Ionicons name="qr-code-outline" size={16} color="#fff" />
-                    <Text style={styles.ctaText}>扫码完成</Text>
+                    <Text style={styles.ctaText}>{t('scanDone')}</Text>
                   </LinearGradient>
                 </Pressable>
               </View>

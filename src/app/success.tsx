@@ -5,9 +5,11 @@ import { useEffect, useState } from 'react';
 import { Animated, Easing, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Brand, Gradients, Radius, Shadow } from '@/constants/brand';
+import { useI18n } from '@/store/i18n';
 
 export default function Success() {
   const { id, price } = useLocalSearchParams<{ id: string; price: string }>();
+  const { t } = useI18n();
   const [scale] = useState(() => new Animated.Value(0));
   const [fade] = useState(() => new Animated.Value(0));
 
@@ -28,25 +30,25 @@ export default function Success() {
         </Animated.View>
 
         <Animated.View style={{ opacity: fade, alignItems: 'center' }}>
-          <Text style={styles.title}>支付成功</Text>
-          <Text style={styles.sub}>订单 {id} 已确认</Text>
+          <Text style={styles.title}>{t('successTitle')}</Text>
+          <Text style={styles.sub}>{t('successSub', { id: id ?? '' })}</Text>
           <Text style={styles.amount}>RM {price}</Text>
 
           <View style={styles.tipCard}>
             <Ionicons name="logo-whatsapp" size={20} color="#25D366" />
-            <Text style={styles.tipText}>预约提醒、付款成功通知和二维码链接已模拟发送到 WhatsApp。</Text>
+            <Text style={styles.tipText}>{t('successTip')}</Text>
           </View>
         </Animated.View>
       </View>
 
       <Animated.View style={[styles.footer, { opacity: fade }]}>
         <Pressable style={styles.btnGhost} onPress={() => router.replace('/(tabs)/orders')}>
-          <Text style={styles.btnGhostText}>查看全部订单</Text>
+          <Text style={styles.btnGhostText}>{t('viewAllOrders')}</Text>
         </Pressable>
         <Pressable onPress={() => router.replace({ pathname: '/order/[id]', params: { id: String(id) } })}>
           <LinearGradient colors={Gradients.brand} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.btnPrimary}>
             <Ionicons name="qr-code-outline" size={18} color="#fff" />
-            <Text style={styles.btnPrimaryText}>查看二维码</Text>
+            <Text style={styles.btnPrimaryText}>{t('viewQr')}</Text>
           </LinearGradient>
         </Pressable>
       </Animated.View>

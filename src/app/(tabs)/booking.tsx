@@ -8,10 +8,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Card, GradIcon } from '@/components/ui';
 import { Brand, Gradients, Radius, Shadow } from '@/constants/brand';
 import { services } from '@/constants/data';
+import { useI18n } from '@/store/i18n';
 
 export default function BookingScreen() {
   const [serviceId, setServiceId] = useState(services[0].id);
   const service = services.find((s) => s.id === serviceId)!;
+  const { t, serviceName, serviceDesc } = useI18n();
 
   function startBooking() {
     router.push({ pathname: '/service/[id]', params: { id: serviceId } });
@@ -22,14 +24,14 @@ export default function BookingScreen() {
       <LinearGradient colors={Gradients.hero} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.headerGrad}>
         <SafeAreaView edges={['top']}>
           <View style={styles.header}>
-            <Text style={styles.headerTitle}>预约服务</Text>
-            <Text style={styles.headerSub}>选择服务，开始预约下单</Text>
+            <Text style={styles.headerTitle}>{t('bookingTitle')}</Text>
+            <Text style={styles.headerSub}>{t('bookingSub')}</Text>
           </View>
         </SafeAreaView>
       </LinearGradient>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
-        <Text style={styles.section}>选择服务类型</Text>
+        <Text style={styles.section}>{t('chooseServiceType')}</Text>
         <View style={{ gap: 12 }}>
           {services.map((s) => {
             const on = s.id === serviceId;
@@ -38,11 +40,11 @@ export default function BookingScreen() {
                 <Card style={[styles.svcRow, on && { borderWidth: 2, borderColor: Brand.primary }]}>
                   <GradIcon icon={s.icon} grad={s.grad} size={48} iconSize={24} />
                   <View style={{ flex: 1 }}>
-                    <Text style={styles.svcName}>{s.name}</Text>
-                    <Text style={styles.svcDesc}>{s.desc}</Text>
+                    <Text style={styles.svcName}>{serviceName(s.id)}</Text>
+                    <Text style={styles.svcDesc}>{serviceDesc(s.id)}</Text>
                   </View>
                   <View style={{ alignItems: 'flex-end' }}>
-                    <Text style={styles.svcFrom}>{s.from > 0 ? `RM${s.from} 起` : '免费'}</Text>
+                    <Text style={styles.svcFrom}>{s.from > 0 ? t('fromPrice', { price: s.from }) : t('free')}</Text>
                     <View style={[styles.radio, on && styles.radioOn]}>
                       {on && <Ionicons name="checkmark" size={12} color="#fff" />}
                     </View>
@@ -53,22 +55,21 @@ export default function BookingScreen() {
           })}
         </View>
 
-        {/* 流程说明 */}
-        <Text style={styles.section}>预约流程</Text>
+        <Text style={styles.section}>{t('bookingFlow')}</Text>
         <Card>
           {[
-            { n: '1', t: '选择套餐与车型', d: '按车型选择，可加购增值服务' },
-            { n: '2', t: '选门店与时段', d: '就近门店，灵活预约时间' },
-            { n: '3', t: '在线支付', d: 'TnG / 信用卡 / FPX' },
-            { n: '4', t: '到店扫码核销', d: '出示订单二维码即可洗车' },
+            { n: '1', title: t('step1Title'), desc: t('step1Desc') },
+            { n: '2', title: t('step2Title'), desc: t('step2Desc') },
+            { n: '3', title: t('step3Title'), desc: t('step3Desc') },
+            { n: '4', title: t('step4Title'), desc: t('step4Desc') },
           ].map((step, i, arr) => (
             <View key={step.n} style={[styles.stepRow, i === arr.length - 1 && { borderBottomWidth: 0 }]}>
               <LinearGradient colors={Gradients.brand} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.stepNo}>
                 <Text style={styles.stepNoText}>{step.n}</Text>
               </LinearGradient>
               <View style={{ flex: 1 }}>
-                <Text style={styles.stepTitle}>{step.t}</Text>
-                <Text style={styles.stepDesc}>{step.d}</Text>
+                <Text style={styles.stepTitle}>{step.title}</Text>
+                <Text style={styles.stepDesc}>{step.desc}</Text>
               </View>
             </View>
           ))}
@@ -79,12 +80,12 @@ export default function BookingScreen() {
 
       <View style={styles.footer}>
         <View>
-          <Text style={styles.footLabel}>已选</Text>
-          <Text style={styles.footVal}>{service.name}</Text>
+          <Text style={styles.footLabel}>{t('selected')}</Text>
+          <Text style={styles.footVal}>{serviceName(service.id)}</Text>
         </View>
         <Pressable onPress={startBooking}>
           <LinearGradient colors={Gradients.brand} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.cta}>
-            <Text style={styles.ctaText}>开始预约</Text>
+            <Text style={styles.ctaText}>{t('startBooking')}</Text>
             <Ionicons name="arrow-forward" size={18} color="#fff" />
           </LinearGradient>
         </Pressable>

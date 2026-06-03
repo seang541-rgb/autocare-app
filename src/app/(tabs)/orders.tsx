@@ -7,16 +7,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Badge, Card, GradIcon } from '@/components/ui';
 import { Brand, Gradients, Radius } from '@/constants/brand';
+import { useI18n } from '@/store/i18n';
 import { useOrders } from '@/store/orders';
 
-const TABS = [
-  { key: 'upcoming', label: '进行中' },
-  { key: 'done', label: '已完成' },
-] as const;
+const TABS = ['upcoming', 'done'] as const;
 
 export default function OrdersScreen() {
   const [tab, setTab] = useState<'upcoming' | 'done'>('upcoming');
   const { list: all } = useOrders();
+  const { t, orderService, outletName } = useI18n();
   const list = useMemo(() => all.filter((o) => o.status === tab), [all, tab]);
 
   const openDetail = (id: string) => router.push({ pathname: '/order/[id]', params: { id } });
@@ -26,15 +25,14 @@ export default function OrdersScreen() {
       <LinearGradient colors={Gradients.hero} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.headerGrad}>
         <SafeAreaView edges={['top']}>
           <View style={styles.header}>
-            <Text style={styles.headerTitle}>我的订单</Text>
+            <Text style={styles.headerTitle}>{t('ordersTitle')}</Text>
           </View>
-          {/* 分段控件 */}
           <View style={styles.segment}>
-            {TABS.map((t) => {
-              const on = t.key === tab;
+            {TABS.map((item) => {
+              const on = item === tab;
               return (
-                <Pressable key={t.key} style={[styles.segItem, on && styles.segItemOn]} onPress={() => setTab(t.key)}>
-                  <Text style={[styles.segText, on && styles.segTextOn]}>{t.label}</Text>
+                <Pressable key={item} style={[styles.segItem, on && styles.segItemOn]} onPress={() => setTab(item)}>
+                  <Text style={[styles.segText, on && styles.segTextOn]}>{t(item === 'upcoming' ? 'inProgress' : 'completed')}</Text>
                 </Pressable>
               );
             })}
@@ -46,7 +44,7 @@ export default function OrdersScreen() {
         {list.length === 0 ? (
           <View style={styles.empty}>
             <Ionicons name="file-tray-outline" size={48} color={Brand.textSub} />
-            <Text style={styles.emptyText}>暂无订单</Text>
+            <Text style={styles.emptyText}>{t('noOrders')}</Text>
           </View>
         ) : (
           list.map((o) => (
@@ -55,13 +53,13 @@ export default function OrdersScreen() {
               <View style={styles.cardTop}>
                 <GradIcon icon={o.icon} grad={o.grad} size={46} iconSize={22} />
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.service}>{o.service}</Text>
-                  <Text style={styles.outlet}>{o.outlet}</Text>
+                  <Text style={styles.service}>{orderService(o)}</Text>
+                  <Text style={styles.outlet}>{outletName(o.outletId, o.outlet)}</Text>
                 </View>
                 {o.status === 'upcoming' ? (
-                  <Badge text="待到店" color={Brand.warn} soft={Brand.warnSoft} />
+                  <Badge text={t('pendingArrival')} color={Brand.warn} soft={Brand.warnSoft} />
                 ) : (
-                  <Badge text="已完成" color={Brand.success} soft={Brand.successSoft} />
+                  <Badge text={t('done')} color={Brand.success} soft={Brand.successSoft} />
                 )}
               </View>
 
@@ -80,22 +78,22 @@ export default function OrdersScreen() {
                   <>
                     <Pressable style={[styles.btn, styles.btnGhost]} onPress={() => openDetail(o.id)}>
                       <Ionicons name="calendar-outline" size={15} color={Brand.text} />
-                      <Text style={styles.btnGhostText}>改期</Text>
+                      <Text style={styles.btnGhostText}>{t('reschedule')}</Text>
                     </Pressable>
                     <Pressable style={[styles.btn, styles.btnPrimary]} onPress={() => openDetail(o.id)}>
                       <Ionicons name="qr-code-outline" size={15} color="#fff" />
-                      <Text style={styles.btnPrimaryText}>核销二维码</Text>
+                      <Text style={styles.btnPrimaryText}>{t('redeemQr')}</Text>
                     </Pressable>
                   </>
                 ) : (
                   <>
                     <Pressable style={[styles.btn, styles.btnGhost]} onPress={() => openDetail(o.id)}>
                       <Ionicons name="star-outline" size={15} color={Brand.text} />
-                      <Text style={styles.btnGhostText}>评价</Text>
+                      <Text style={styles.btnGhostText}>{t('review')}</Text>
                     </Pressable>
                     <Pressable style={[styles.btn, styles.btnPrimary]} onPress={() => router.push({ pathname: '/service/[id]', params: { id: 'wash' } })}>
                       <Ionicons name="refresh" size={15} color="#fff" />
-                      <Text style={styles.btnPrimaryText}>再次预约</Text>
+                      <Text style={styles.btnPrimaryText}>{t('bookAgain')}</Text>
                     </Pressable>
                   </>
                 )}

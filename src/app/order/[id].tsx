@@ -8,6 +8,7 @@ import QRCode from 'react-native-qrcode-svg';
 import { BackHeader, Card } from '@/components/ui';
 import { Brand, Gradients, Radius, Shadow } from '@/constants/brand';
 import { dates, timeSlots } from '@/constants/data';
+import { useI18n } from '@/store/i18n';
 import { useOrders } from '@/store/orders';
 import { useToast } from '@/store/toast';
 
@@ -16,6 +17,7 @@ export default function OrderDetail() {
   const { getById, redeem, reschedule, addReview, addComplaint } = useOrders();
   const order = getById(String(id));
   const toast = useToast();
+  const { t, orderService, outletName, dateLabel } = useI18n();
   const [confirming, setConfirming] = useState(false);
   const [reschedOpen, setReschedOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
@@ -23,16 +25,16 @@ export default function OrderDetail() {
   const [rDate, setRDate] = useState(0);
   const [rSlot, setRSlot] = useState('14:30');
   const [rating, setRating] = useState(5);
-  const [review, setReview] = useState('服务很顺利，门店人员很友善。');
-  const [complaint, setComplaint] = useState('请描述你遇到的问题，我们会在 WhatsApp 跟进。');
+  const [review, setReview] = useState(t('defaultReview'));
+  const [complaint, setComplaint] = useState(t('defaultComplaint'));
 
   if (!order) {
     return (
       <View style={styles.root}>
-        <BackHeader title="订单详情" />
+        <BackHeader title={t('orderDetail')} />
         <View style={styles.empty}>
           <Ionicons name="alert-circle-outline" size={48} color={Brand.textSub} />
-          <Text style={styles.emptyText}>订单不存在</Text>
+          <Text style={styles.emptyText}>{t('orderMissing')}</Text>
         </View>
       </View>
     );
@@ -45,7 +47,7 @@ export default function OrderDetail() {
     const d = dates[rDate];
     reschedule(currentOrder.id, `2026-06-${d.day}`, rSlot);
     setReschedOpen(false);
-    toast('改期成功，预约提醒将通过 WhatsApp 发送');
+    toast(t('rescheduledToast'));
   }
 
   function doRedeem() {
@@ -53,32 +55,32 @@ export default function OrderDetail() {
     setTimeout(() => {
       redeem(currentOrder.id);
       setConfirming(false);
-      toast('核销成功，订单状态已更新');
+      toast(t('redeemSuccessToast'));
     }, 700);
   }
 
   function submitReview() {
     addReview(currentOrder.id, rating, review);
     setFeedbackOpen(false);
-    toast('评价已提交，谢谢反馈');
+    toast(t('reviewToast'));
   }
 
   function submitComplaint() {
     addComplaint(currentOrder.id, complaint);
     setComplaintOpen(false);
-    toast('投诉已提交，AI 客服会通过 WhatsApp 跟进');
+    toast(t('complaintToast'));
   }
 
   return (
     <View style={styles.root}>
-      <BackHeader title="订单详情" sub={currentOrder.id} />
+      <BackHeader title={t('orderDetail')} sub={currentOrder.id} />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
         <Card style={styles.qrCard}>
           <View style={[styles.statusPill, done ? styles.pillDone : styles.pillWait]}>
             <Ionicons name={done ? 'checkmark-circle' : 'time'} size={14} color={done ? Brand.success : Brand.warn} />
             <Text style={[styles.statusText, { color: done ? Brand.success : Brand.warn }]}>
-              {done ? '已完成' : '待到店核销'}
+              {done ? t('done') : t('pendingRedeemLong')}
             </Text>
           </View>
 
@@ -92,7 +94,7 @@ export default function OrderDetail() {
           </View>
 
           <Text style={styles.qrCode}>{currentOrder.id}</Text>
-          <Text style={styles.qrHint}>{done ? '本订单已完成服务' : '到店向员工出示此二维码'}</Text>
+          <Text style={styles.qrHint}>{done ? t('qrDoneHint') : t('qrVisitHint')}</Text>
         </Card>
 
         <Card style={{ marginTop: 14 }}>
@@ -101,31 +103,31 @@ export default function OrderDetail() {
               <Ionicons name={currentOrder.icon} size={22} color="#fff" />
             </LinearGradient>
             <View style={{ flex: 1 }}>
-              <Text style={styles.svcName}>{currentOrder.service}</Text>
-              <Text style={styles.svcOutlet}>{currentOrder.outlet}</Text>
+              <Text style={styles.svcName}>{orderService(currentOrder)}</Text>
+              <Text style={styles.svcOutlet}>{outletName(currentOrder.outletId, currentOrder.outlet)}</Text>
             </View>
             <Text style={styles.svcPrice}>RM {currentOrder.price}</Text>
           </View>
 
           <View style={styles.divider} />
-          <Info icon="calendar-outline" label="预约时间" value={`${currentOrder.date} · ${currentOrder.time}`} />
-          <Info icon="location-outline" label="门店" value={currentOrder.outlet} />
-          <Info icon="card-outline" label="支付状态" value="已支付" valueColor={Brand.success} />
-          <Info icon="receipt-outline" label="订单号" value={currentOrder.id} />
+          <Info icon="calendar-outline" label={t('bookingTime')} value={`${currentOrder.date} · ${currentOrder.time}`} />
+          <Info icon="location-outline" label={t('outlet')} value={outletName(currentOrder.outletId, currentOrder.outlet)} />
+          <Info icon="card-outline" label={t('paymentStatus')} value={t('paid')} valueColor={Brand.success} />
+          <Info icon="receipt-outline" label={t('orderNo')} value={currentOrder.id} />
         </Card>
 
         {done && (
           <Card style={{ marginTop: 14 }}>
-            <Text style={styles.sectionTitle}>服务评价</Text>
+            <Text style={styles.sectionTitle}>{t('serviceReview')}</Text>
             {currentOrder.rating ? (
               <View style={styles.reviewBox}>
                 <Text style={styles.stars}>{'★'.repeat(currentOrder.rating)}{'☆'.repeat(5 - currentOrder.rating)}</Text>
                 <Text style={styles.reviewText}>{currentOrder.review}</Text>
               </View>
             ) : (
-              <Text style={styles.reviewText}>还没有评价这个服务。</Text>
+              <Text style={styles.reviewText}>{t('noReviewYet')}</Text>
             )}
-            {currentOrder.complaint ? <Text style={styles.complaintText}>投诉记录：{currentOrder.complaint}</Text> : null}
+            {currentOrder.complaint ? <Text style={styles.complaintText}>{t('complaintRecord', { complaint: currentOrder.complaint })}</Text> : null}
           </Card>
         )}
 
@@ -136,12 +138,12 @@ export default function OrderDetail() {
         <View style={styles.footer}>
           <Pressable onPress={() => setReschedOpen(true)} style={styles.reschedBtn}>
             <Ionicons name="calendar-outline" size={16} color={Brand.text} />
-            <Text style={styles.reschedText}>改期</Text>
+            <Text style={styles.reschedText}>{t('reschedule')}</Text>
           </Pressable>
           <Pressable onPress={doRedeem} disabled={confirming} style={{ flex: 1 }}>
             <LinearGradient colors={Gradients.brand} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={[styles.cta, confirming && { opacity: 0.7 }]}>
               <Ionicons name="scan" size={18} color="#fff" />
-              <Text style={styles.ctaText}>{confirming ? '核销中…' : '模拟扫码核销'}</Text>
+              <Text style={styles.ctaText}>{confirming ? t('redeeming') : t('simulateRedeem')}</Text>
             </LinearGradient>
           </Pressable>
         </View>
@@ -149,32 +151,32 @@ export default function OrderDetail() {
         <View style={styles.footer}>
           <Pressable onPress={() => setComplaintOpen(true)} style={styles.reschedBtn}>
             <Ionicons name="alert-circle-outline" size={16} color={Brand.text} />
-            <Text style={styles.reschedText}>投诉</Text>
+            <Text style={styles.reschedText}>{t('complaint')}</Text>
           </Pressable>
           <Pressable onPress={() => setFeedbackOpen(true)} style={{ flex: 1 }}>
             <LinearGradient colors={Gradients.brand} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.cta}>
               <Ionicons name="star" size={18} color="#fff" />
-              <Text style={styles.ctaText}>评分与评论</Text>
+              <Text style={styles.ctaText}>{t('rateAndComment')}</Text>
             </LinearGradient>
           </Pressable>
         </View>
       )}
 
       <Modal visible={reschedOpen} transparent animationType="slide" onRequestClose={() => setReschedOpen(false)}>
-        <Sheet onClose={() => setReschedOpen(false)} title="选择新的日期与时段">
-          <Text style={styles.sheetLabel}>日期</Text>
+        <Sheet onClose={() => setReschedOpen(false)} title={t('chooseNewSlot')}>
+          <Text style={styles.sheetLabel}>{t('date')}</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10 }}>
             {dates.map((dd, i) => {
               const on = i === rDate;
               return (
                 <Pressable key={dd.day} onPress={() => setRDate(i)} style={[styles.dateChip, on && styles.dateChipOn]}>
-                  <Text style={[styles.dateWeek, on && { color: '#fff' }]}>{dd.label || dd.week}</Text>
+                  <Text style={[styles.dateWeek, on && { color: '#fff' }]}>{dateLabel(dd.label, dd.week)}</Text>
                   <Text style={[styles.dateDay, on && { color: '#fff' }]}>{dd.day}</Text>
                 </Pressable>
               );
             })}
           </ScrollView>
-          <Text style={styles.sheetLabel}>时段</Text>
+          <Text style={styles.sheetLabel}>{t('timeSlot')}</Text>
           <View style={styles.slotGrid}>
             {timeSlots.map((t) => {
               const on = t === rSlot;
@@ -187,14 +189,14 @@ export default function OrderDetail() {
           </View>
           <Pressable onPress={applyReschedule} style={{ marginTop: 18 }}>
             <LinearGradient colors={Gradients.brand} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.sheetCta}>
-              <Text style={styles.ctaText}>确认改期</Text>
+              <Text style={styles.ctaText}>{t('confirmReschedule')}</Text>
             </LinearGradient>
           </Pressable>
         </Sheet>
       </Modal>
 
       <Modal visible={feedbackOpen} transparent animationType="slide" onRequestClose={() => setFeedbackOpen(false)}>
-        <Sheet onClose={() => setFeedbackOpen(false)} title="评分与门店评论">
+        <Sheet onClose={() => setFeedbackOpen(false)} title={t('rateAndComment')}>
           <View style={styles.ratingRow}>
             {[1, 2, 3, 4, 5].map((n) => (
               <Pressable key={n} onPress={() => setRating(n)}>
@@ -205,18 +207,18 @@ export default function OrderDetail() {
           <TextInput value={review} onChangeText={setReview} multiline style={styles.input} />
           <Pressable onPress={submitReview}>
             <LinearGradient colors={Gradients.brand} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.sheetCta}>
-              <Text style={styles.ctaText}>提交评价</Text>
+              <Text style={styles.ctaText}>{t('submitReview')}</Text>
             </LinearGradient>
           </Pressable>
         </Sheet>
       </Modal>
 
       <Modal visible={complaintOpen} transparent animationType="slide" onRequestClose={() => setComplaintOpen(false)}>
-        <Sheet onClose={() => setComplaintOpen(false)} title="投诉入口">
+        <Sheet onClose={() => setComplaintOpen(false)} title={t('complaintEntry')}>
           <TextInput value={complaint} onChangeText={setComplaint} multiline style={styles.input} />
           <Pressable onPress={submitComplaint}>
             <LinearGradient colors={Gradients.brand} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.sheetCta}>
-              <Text style={styles.ctaText}>提交投诉</Text>
+              <Text style={styles.ctaText}>{t('submitComplaint')}</Text>
             </LinearGradient>
           </Pressable>
         </Sheet>
