@@ -1,668 +1,329 @@
 import { createContext, ReactNode, useContext, useMemo, useState } from 'react';
 
-import type { Order, Promo, Service } from '@/constants/data';
+import type { CatalogItem, Category, FulfilmentMode, MarketplaceStatus, Merchant, Order, OrderLine, Promo, Service } from '@/constants/data';
 
 export type Language = 'zh' | 'en' | 'ms';
 
 type Dict = Record<string, string>;
 type ServiceId = Service['id'];
+type CatalogCopy = { name: string; desc: string };
 type NotificationCopy = { title: string; body: string };
 
+const en: Dict = {
+  home: 'Home', booking: 'Explore', orders: 'Orders', staff: 'Merchant', profile: 'Me',
+  language: 'Language', chinese: 'Chinese', english: 'English', malay: 'Bahasa Melayu',
+  points: 'Points', remainingWash: 'Active orders', coupons: 'Vouchers', myVehicles: 'Car-care profile',
+  paymentMethods: 'Payment methods', addressBook: 'Addresses', whatsappAiCare: 'WhatsApp / AI Care',
+  complaintCenter: 'Complaint centre', settings: 'Settings', availableCoupons: '{count} available',
+  supportMenuSub: 'Orders, payments, complaints', complaintMenuSub: 'Service follow-up tickets', logout: 'Log out',
+  openNow: 'Open', closed: 'Closed', free: 'Free', none: 'None', add: 'Add', save: 'Save', delete: 'Delete', cancel: 'Cancel',
+  all: 'All', usable: 'Usable', used: 'Used', expired: 'Expired', requiredFields: 'Please fill in the required fields.',
+  savedToast: 'Saved.', deletedToast: 'Deleted.', packageIncluded: 'Package includes', chooseVehicle: 'Choose vehicle type',
+  addOns: 'Add-ons', total: 'Total', chooseOutletSlot: 'Continue', promoCampaign: 'Promotion',
+  quoteComingToast: 'This offer will be connected to marketplace checkout later.', freeQuote: 'Free quote', saveAmount: 'Save RM{amount}',
+  promoBenefits: 'Benefits', promoTerms: 'Terms', promoPrice: 'Promo price', limitedOffer: 'Limited offer', zeroQuote: 'Free',
+  cardDebit: 'Credit / debit card', fpxBank: 'FPX online banking', default: 'Default', setDefault: 'Set default',
+  plateNo: 'Plate no.', vehicleModel: 'Vehicle model', vehicleYear: 'Year', addVehicle: 'Add vehicle',
+  vehicleSub: 'Vehicle information for car-care bookings', noVehicles: 'No vehicles yet', couponSub: 'View marketplace voucher status and rules',
+  couponRule: 'Rule', noCoupons: 'No vouchers in this category.', paymentSub: 'Manage payment placeholders for merchant checkout',
+  addPayment: 'Add payment method', paymentName: 'Payment name', paymentDetail: 'Payment note', paymentPlaceholder: 'Example: Maybank FPX',
+  paymentDetailPlaceholder: 'Example: Merchant bank account pending setup', addressSub: 'Manage pickup, service and billing addresses',
+  addAddress: 'Add address', editAddress: 'Edit address', addressLabel: 'Address label', addressDetail: 'Full address',
+  addressLabelPlaceholder: 'Example: Home / Office', addressDetailPlaceholder: 'Street, area and postcode', noAddresses: 'No addresses yet',
+  memberQr: 'Member QR', memberQrSub: 'Show this for merchant membership and service verification', scanForMember: 'Show this QR to the merchant',
+  send: 'Send', supportPlaceholder: 'Ask about orders, merchants or payments', quickQuestions: 'Quick questions',
+  quickQueue: 'Merchant wait time', quickPayment: 'Payment status', quickChangeBooking: 'Change order', quickComplaintFollow: 'Complaint follow-up',
+  supportSeedHello: 'Hi, I can help with merchant wait times, order changes, payment status and complaints.',
+  aiQueueReply: 'SparkWash Kepong is currently fastest, and food pickup is around 18 minutes.',
+  aiPaymentReply: 'Payment is still in demo mode. TnG, FPX and bank transfer can be connected when merchant accounts are ready.',
+  aiComplaintReply: 'You can open a complaint ticket here. AI Care can keep WhatsApp follow-up enabled.',
+  aiDefaultReply: 'I can help with order changes, merchant wait times, payment confirmation and complaint follow-up.',
+  complaintTopic: 'Complaint topic', complaintDetail: 'Complaint detail', submitTicket: 'Submit ticket', open: 'Open', reviewing: 'Reviewing',
+  resolved: 'Resolved', markResolved: 'Mark resolved', noComplaints: 'No complaint tickets yet', settingsSub: 'Notifications, AI Care and display preferences',
+  bookingReminderSetting: 'Order reminders', paymentAlertSetting: 'Payment success alerts', whatsappFollowUpSetting: 'WhatsApp follow-up',
+  darkHeaderSetting: 'Dark profile header', login: 'Log in', loginTitle: 'Log in', loginSub: 'Log in to manage orders, merchants and profile details.',
+  registerTitle: 'Create account', registerSub: 'Create a local test account for this marketplace preview.', fullName: 'Full name',
+  phoneNumber: 'Phone number', pinCode: '4-digit PIN', vehiclePlate: 'Vehicle plate', createAccount: 'Create account',
+  noAccount: 'No account yet?', haveAccount: 'Already have an account?', invalidLogin: 'Phone number or PIN is incorrect.',
+  accountExists: 'This phone number is already registered.', registerSuccess: 'Account created.', loginSuccess: 'Logged in.',
+  orderDetail: 'Order detail', orderMissing: 'Order not found.', paid: 'Paid', date: 'Date', timeSlot: 'Time slot', outlet: 'Merchant',
+  paymentStatus: 'Payment status', orderNo: 'Order no.', bookingTime: 'Order time', merchantTimeline: 'Merchant timeline', completeRedeem: 'Complete / redeem', moveToStatus: 'Move to {status}', orderUpdatedToast: 'Order {id} updated to {status}.', qrCompleted: 'This order is completed.', qrHintMerchant: 'Show this QR to the merchant when needed.', voucher: 'Voucher', note: 'Note',
+  searchPlaceholder: 'Search food, wash, shops', merchantTools: 'Merchant tools', todayOverview: 'Today overview', readyOrders: 'Ready orders', preparingOrders: 'Preparing', marketplace: 'Marketplace', homeHeroTitle: 'Car wash, food and local merchants in one app.', homeHeroSub: 'Browse nearby businesses, order for pickup, book services, and let merchants manage the queue.',
+  fastestNow: 'Fastest now: {name} - {mins} min', chooseCategory: 'Choose a category', viewAll: 'View all', featuredMerchants: 'Featured merchants', nearbyNow: 'Nearby now', promos: 'Promos',
+  notificationsWhatsapp: 'Notifications & WhatsApp', merchantStats: '{distance} km - {mins} min', merchantQueue: '{area} - {mins} min - {queue} in queue',
+  exploreTitle: 'Explore merchants', exploreSub: 'Choose food, car care, retail or services nearby.', allCategories: 'All', merchantPlatformReady: 'Merchant platform ready', merchantPlatformBody: 'This version supports customer browsing and a merchant console for order updates.',
+  menuServices: 'Menu & services', popular: 'Popular', checkout: 'Checkout', fulfilment: 'Fulfilment', pickup: 'Pickup', service: 'Service', orderSummary: 'Order summary', customerNote: 'Customer note', notePlaceholder: 'Example: less spicy, call when ready',
+  paymentMethod: 'Payment method', manualPayment: 'Manual / test confirmation', tngPlaceholder: "Touch 'n Go QR placeholder", bankPlaceholder: 'Bank transfer placeholder', subtotal: 'Subtotal', platformVoucher: 'Platform voucher', amountDue: 'Amount due', placeOrder: 'Place order', confirming: 'Confirming...', noItemsSelected: 'No items selected.',
+  orderPlaced: 'Order placed', orderSentMerchant: 'Order {id} has been sent to the merchant.', allOrders: 'All orders', merchantView: 'Merchant view', successTipMarketplace: 'Merchant updates, payment confirmation and pickup reminders can be sent through WhatsApp.',
+  myOrders: 'My orders', ordersSub: 'Track food, car care, retail and services in one place.', active: 'Active', history: 'History', noOrdersHere: 'No orders here yet.',
+  merchantConsoleTitle: 'Merchant console', merchantConsoleSub: 'Accept orders, update status, and complete QR/service orders.', demoMerchantName: 'LokalGo Merchant HQ', demoMerchantSub: 'Managing todays merchant orders', liveOrders: 'Live orders', completed: 'Completed', revenue: 'Revenue', orderQueue: 'Order queue', noActiveOrders: 'No active orders.',
+  accept: 'Accept', startPreparing: 'Start preparing', markReady: 'Mark ready', complete: 'Complete', noAddress: 'No address', noPaymentMethod: 'No payment method', marketplaceAccount: 'Marketplace account', activeOrders: 'Active orders', vouchers: 'Vouchers', addresses: 'Addresses', merchantMode: 'Merchant mode', merchantModeSub: 'Manage orders and status', carCareProfile: 'Car-care profile', carCareProfileSub: 'Vehicle info for wash bookings', explore: 'Explore', marketplaceRebuild: 'Marketplace rebuild', walletBalance: 'Wallet balance', scanPay: 'Scan & pay', rewards: 'Rewards', premiumPicks: 'Premium picks', quickActions: 'Quick actions', ordersToday: 'Orders today', settlement: 'Settlement', businessAccount: 'Business account', qrCounter: 'QR counter', merchantInsights: 'Merchant insights', topMerchant: 'Top merchant', sponsored: 'Sponsored',
+};
+
 const labels: Record<Language, Dict> = {
+  en,
   zh: {
-    home: '首页',
-    booking: '预约',
-    orders: '订单',
-    staff: '核销',
-    profile: '我的',
-    language: '语言',
-    chinese: '中文',
-    english: 'English',
-    malay: 'Bahasa Melayu',
-    openNow: '营业中',
-    closed: '休息中',
-    aiCare: 'AI 客服 / WhatsApp',
-    staffDesk: '员工核销端',
-    fastestBooking: '最快可预约',
-    queueCars: '排队车辆',
-    estimatedWait: '预计等待',
-    outletRating: '门店评分',
-    bookWashNow: '立即预约洗车',
-    myPass: '我的月卡',
-    timesAvailable: '{left}/{total} 次可用',
-    serviceCategories: '服务分类',
-    mapQueueStatus: '门店地图和排队状态',
-    askAi: '问 AI 客服',
-    promo: '优惠',
-    notificationsWhatsapp: '通知与 WhatsApp',
-    aiPanelBody: '预约提醒、付款通知和投诉跟进都从这里处理。',
-    aiFastestReply: 'AI 客服：JagaWash 甲洞店最快，预计等 12 分钟。',
-    bookingTitle: '预约服务',
-    bookingSub: '选择服务，开始预约下单',
-    chooseServiceType: '选择服务类型',
-    bookingFlow: '预约流程',
-    selected: '已选',
-    startBooking: '开始预约',
-    fromPrice: 'RM{price} 起',
-    free: '免费',
-    step1Title: '选择套餐与车型',
-    step1Desc: '按车型选择，可加购增值服务',
-    step2Title: '选门店与时段',
-    step2Desc: '就近门店，灵活预约时间',
-    step3Title: '在线支付',
-    step3Desc: 'TnG / 信用卡 / FPX',
-    step4Title: '到店扫码核销',
-    step4Desc: '出示订单二维码即可洗车',
-    ordersTitle: '我的订单',
-    inProgress: '进行中',
-    completed: '已完成',
-    noOrders: '暂无订单',
-    pendingArrival: '待到店',
-    done: '已完成',
-    reschedule: '改期',
-    redeemQr: '核销二维码',
-    review: '评价',
-    bookAgain: '再次预约',
-    staffSub: '今日预约、扫码核销、订单状态更新',
-    scanRedeem: '扫码核销',
-    staffDemo: 'Demo 模式：点击订单即可模拟扫码完成服务。',
-    todayBookings: '今日预约列表',
-    allDoneToday: '今日预约都已完成',
-    pendingRedeem: '待核销',
-    scanDone: '扫码完成',
-    redeemedToast: '订单 {id} 已核销，状态更新为已完成',
-    points: '积分',
-    remainingWash: '剩余洗车',
-    coupons: '优惠券',
-    myVehicles: '我的车辆',
-    paymentMethods: '支付方式',
-    addressBook: '地址管理',
-    whatsappAiCare: 'WhatsApp / AI 客服',
-    complaintCenter: '投诉中心',
-    settings: '设置',
-    availableCoupons: '{count} 张可用',
-    supportMenuSub: '预约、付款、投诉',
-    complaintMenuSub: '服务问题跟进',
-    demoEntryToast: '{label}：Demo 功能已接入入口',
-    vehicleToast: '车辆管理开发中',
-    packageIncluded: '套餐包含',
-    chooseVehicle: '选择车型',
-    addOns: '增值加购',
-    total: '合计',
-    chooseOutletSlot: '选择门店时段',
-    none: '无',
-    confirmOrder: '确认订单',
-    confirmSub: '核对信息后付款',
-    addOnPrefix: '加购：{addons}',
-    outlet: '门店',
-    date: '日期',
-    timeSlot: '时段',
-    paymentMethod: '支付方式',
-    serviceFee: '服务费用',
-    platformDiscount: '平台优惠',
-    amountDue: '应付总额',
-    payNow: '立即支付',
-    paying: '支付中...',
-    paid: '已支付',
-    successTitle: '支付成功',
-    successSub: '订单 {id} 已确认',
-    successTip: '预约提醒、付款成功通知和二维码链接已模拟发送到 WhatsApp。',
-    viewAllOrders: '查看全部订单',
-    viewQr: '查看二维码',
-    orderDetail: '订单详情',
-    orderMissing: '订单不存在',
-    pendingRedeemLong: '待到店核销',
-    qrDoneHint: '本订单已完成服务',
-    qrVisitHint: '到店向员工出示此二维码',
-    bookingTime: '预约时间',
-    paymentStatus: '支付状态',
-    orderNo: '订单号',
-    serviceReview: '服务评价',
-    noReviewYet: '还没有评价这个服务。',
-    complaintRecord: '投诉记录：{complaint}',
-    complaint: '投诉',
-    rateAndComment: '评分与评论',
-    redeeming: '核销中...',
-    simulateRedeem: '模拟扫码核销',
-    chooseNewSlot: '选择新的日期与时段',
-    confirmReschedule: '确认改期',
-    submitReview: '提交评价',
-    complaintEntry: '投诉入口',
-    submitComplaint: '提交投诉',
-    rescheduledToast: '改期成功，预约提醒将通过 WhatsApp 发送',
-    redeemSuccessToast: '核销成功，订单状态已更新',
-    reviewToast: '评价已提交，谢谢反馈',
-    complaintToast: '投诉已提交，AI 客服会通过 WhatsApp 跟进',
-    defaultReview: '服务很顺利，门店人员很友善。',
-    defaultComplaint: '请描述你遇到的问题，我们会在 WhatsApp 跟进。',
-    promoCampaign: '促销活动',
-    quoteComingToast: '报价功能开发中，敬请期待',
-    freeQuote: '免费报价',
-    saveAmount: '立省 RM{amount}',
-    promoBenefits: '活动权益',
-    promoTerms: '使用须知',
-    promoPrice: '优惠价',
-    limitedOffer: '限时活动',
-    zeroQuote: '0 元报价',
-    cardDebit: '信用卡 / 借记卡',
-    fpxBank: 'FPX 网上银行',
-  },
-  en: {
-    home: 'Home',
-    booking: 'Book',
-    orders: 'Orders',
-    staff: 'Redeem',
-    profile: 'Me',
-    language: 'Language',
-    chinese: '中文',
-    english: 'English',
-    malay: 'Bahasa Melayu',
-    openNow: 'Open',
-    closed: 'Closed',
-    aiCare: 'AI Care / WhatsApp',
-    staffDesk: 'Staff redemption',
-    fastestBooking: 'Fastest slot',
-    queueCars: 'Queue',
-    estimatedWait: 'Est. wait',
-    outletRating: 'Rating',
-    bookWashNow: 'Book a wash now',
-    myPass: 'My monthly pass',
-    timesAvailable: '{left}/{total} washes left',
-    serviceCategories: 'Services',
-    mapQueueStatus: 'Map and queue status',
-    askAi: 'Ask AI',
-    promo: 'Promos',
-    notificationsWhatsapp: 'Notifications & WhatsApp',
-    aiPanelBody: 'Booking reminders, payment alerts, and complaint follow-up are handled here.',
-    aiFastestReply: 'AI Care: JagaWash Kepong is fastest, about 12 minutes wait.',
-    bookingTitle: 'Book service',
-    bookingSub: 'Choose a service and start booking',
-    chooseServiceType: 'Choose service type',
-    bookingFlow: 'Booking flow',
-    selected: 'Selected',
-    startBooking: 'Start booking',
-    fromPrice: 'From RM{price}',
-    free: 'Free',
-    step1Title: 'Choose package and car type',
-    step1Desc: 'Pick by vehicle type and add extra services',
-    step2Title: 'Choose outlet and slot',
-    step2Desc: 'Book a nearby outlet at a flexible time',
-    step3Title: 'Pay online',
-    step3Desc: 'TnG / Card / FPX',
-    step4Title: 'Redeem in store',
-    step4Desc: 'Show the order QR code to redeem',
-    ordersTitle: 'My orders',
-    inProgress: 'Active',
-    completed: 'Completed',
-    noOrders: 'No orders yet',
-    pendingArrival: 'To visit',
-    done: 'Done',
-    reschedule: 'Reschedule',
-    redeemQr: 'Redeem QR',
-    review: 'Review',
-    bookAgain: 'Book again',
-    staffSub: 'Today bookings, QR redemption, and order updates',
-    scanRedeem: 'Scan redemption',
-    staffDemo: 'Demo mode: tap an order to simulate redemption.',
-    todayBookings: 'Today bookings',
-    allDoneToday: 'All bookings are completed',
-    pendingRedeem: 'Pending',
-    scanDone: 'Complete',
-    redeemedToast: 'Order {id} redeemed and marked as completed',
-    points: 'Points',
-    remainingWash: 'Washes left',
-    coupons: 'Coupons',
-    myVehicles: 'My vehicles',
-    paymentMethods: 'Payment methods',
-    addressBook: 'Address book',
-    whatsappAiCare: 'WhatsApp / AI Care',
-    complaintCenter: 'Complaint center',
-    settings: 'Settings',
-    availableCoupons: '{count} available',
-    supportMenuSub: 'Booking, payment, complaints',
-    complaintMenuSub: 'Service issue follow-up',
-    demoEntryToast: '{label}: demo entry is connected',
-    vehicleToast: 'Vehicle management is in development',
-    packageIncluded: 'Package includes',
-    chooseVehicle: 'Choose vehicle type',
-    addOns: 'Add-ons',
-    total: 'Total',
-    chooseOutletSlot: 'Choose outlet and slot',
-    none: 'None',
-    confirmOrder: 'Confirm order',
-    confirmSub: 'Check details and pay',
-    addOnPrefix: 'Add-ons: {addons}',
-    outlet: 'Outlet',
-    date: 'Date',
-    timeSlot: 'Time',
-    paymentMethod: 'Payment method',
-    serviceFee: 'Service fee',
-    platformDiscount: 'Platform discount',
-    amountDue: 'Amount due',
-    payNow: 'Pay now',
-    paying: 'Paying...',
-    paid: 'Paid',
-    successTitle: 'Payment successful',
-    successSub: 'Order {id} confirmed',
-    successTip: 'Booking reminder, payment success alert, and QR link were simulated to WhatsApp.',
-    viewAllOrders: 'View all orders',
-    viewQr: 'View QR code',
-    orderDetail: 'Order details',
-    orderMissing: 'Order not found',
-    pendingRedeemLong: 'Pending store redemption',
-    qrDoneHint: 'This order has been completed',
-    qrVisitHint: 'Show this QR code to staff in store',
-    bookingTime: 'Booking time',
-    paymentStatus: 'Payment status',
-    orderNo: 'Order no.',
-    serviceReview: 'Service review',
-    noReviewYet: 'No review for this service yet.',
-    complaintRecord: 'Complaint: {complaint}',
-    complaint: 'Complaint',
-    rateAndComment: 'Rating and comment',
-    redeeming: 'Redeeming...',
-    simulateRedeem: 'Simulate QR redemption',
-    chooseNewSlot: 'Choose a new date and time',
-    confirmReschedule: 'Confirm reschedule',
-    submitReview: 'Submit review',
-    complaintEntry: 'Complaint entry',
-    submitComplaint: 'Submit complaint',
-    rescheduledToast: 'Rescheduled successfully. Reminder will be sent via WhatsApp.',
-    redeemSuccessToast: 'Redeemed successfully. Order status updated.',
-    reviewToast: 'Review submitted. Thanks for the feedback.',
-    complaintToast: 'Complaint submitted. AI Care will follow up via WhatsApp.',
-    defaultReview: 'Service went smoothly and the outlet staff were friendly.',
-    defaultComplaint: 'Describe the issue you faced. We will follow up on WhatsApp.',
-    promoCampaign: 'Promotion',
-    quoteComingToast: 'Quote feature is coming soon',
-    freeQuote: 'Free quote',
-    saveAmount: 'Save RM{amount}',
-    promoBenefits: 'Benefits',
-    promoTerms: 'Terms',
-    promoPrice: 'Promo price',
-    limitedOffer: 'Limited offer',
-    zeroQuote: 'RM0 quote',
-    cardDebit: 'Credit / debit card',
-    fpxBank: 'FPX online banking',
+    ...en,
+    home: '\u9996\u9875', booking: '\u63a2\u7d22', orders: '\u8ba2\u5355', staff: '\u5546\u5bb6', profile: '\u6211\u7684',
+    language: '\u8bed\u8a00', chinese: '\u4e2d\u6587', points: '\u79ef\u5206', remainingWash: '\u8fdb\u884c\u4e2d\u8ba2\u5355',
+    coupons: '\u4f18\u60e0\u5238', paymentMethods: '\u4ed8\u6b3e\u65b9\u5f0f', addressBook: '\u5730\u5740',
+    complaintCenter: '\u6295\u8bc9\u4e2d\u5fc3', settings: '\u8bbe\u7f6e', logout: '\u9000\u51fa\u767b\u5f55',
+    openNow: '\u8425\u4e1a\u4e2d', closed: '\u4f11\u606f\u4e2d', add: '\u6dfb\u52a0', save: '\u4fdd\u5b58', delete: '\u5220\u9664', cancel: '\u53d6\u6d88',
+    login: '\u767b\u5f55', loginTitle: '\u767b\u5f55', registerTitle: '\u521b\u5efa\u8d26\u53f7', fullName: '\u59d3\u540d', phoneNumber: '\u624b\u673a\u53f7\u7801',
+    createAccount: '\u521b\u5efa\u8d26\u53f7', savedToast: '\u5df2\u4fdd\u5b58', deletedToast: '\u5df2\u5220\u9664', requiredFields: '\u8bf7\u586b\u5199\u5fc5\u8981\u8d44\u6599',
+    paymentStatus: '\u4ed8\u6b3e\u72b6\u6001', orderNo: '\u8ba2\u5355\u53f7', bookingTime: '\u8ba2\u5355\u65f6\u95f4', merchantTimeline: '\u5546\u5bb6\u8fdb\u5ea6', completeRedeem: '\u5b8c\u6210 / \u6838\u9500', moveToStatus: '\u66f4\u65b0\u5230 {status}', orderUpdatedToast: '\u8ba2\u5355 {id} \u5df2\u66f4\u65b0\u4e3a {status}', qrCompleted: '\u8fd9\u5f20\u8ba2\u5355\u5df2\u5b8c\u6210', qrHintMerchant: '\u9700\u8981\u65f6\u5411\u5546\u5bb6\u51fa\u793a\u6b64 QR', voucher: '\u4f18\u60e0', note: '\u5907\u6ce8',
+    searchPlaceholder: '\u641c\u7d22\u9910\u996e\u3001\u6d17\u8f66\u3001\u5546\u5e97', merchantTools: '\u5546\u5bb6\u5de5\u5177', todayOverview: '\u4eca\u65e5\u603b\u89c8', readyOrders: '\u5df2\u51c6\u5907\u8ba2\u5355', preparingOrders: '\u5904\u7406\u4e2d', marketplace: '\u5e73\u53f0', homeHeroTitle: '\u6d17\u8f66\u3001\u9910\u5385\u548c\u672c\u5730\u5546\u5bb6\u90fd\u5728\u4e00\u4e2a App', homeHeroSub: '\u6d4f\u89c8\u9644\u8fd1\u5546\u5bb6\u3001\u81ea\u53d6\u4e0b\u5355\u3001\u9884\u7ea6\u670d\u52a1\u3001\u5546\u5bb6\u7ba1\u7406\u961f\u5217',
+    fastestNow: '\u6700\u5feb\u73b0\u5728\uff1a{name} - {mins} \u5206\u949f', chooseCategory: '\u9009\u62e9\u5206\u7c7b', viewAll: '\u67e5\u770b\u5168\u90e8', featuredMerchants: '\u63a8\u8350\u5546\u5bb6', nearbyNow: '\u9644\u8fd1\u5546\u5bb6', promos: '\u4f18\u60e0',
+    notificationsWhatsapp: '\u901a\u77e5\u4e0e WhatsApp', reviews: '{count} \u6761\u8bc4\u4ef7', inQueue: '\u961f\u5217 {count} \u5355', itemCount: '{count} \u4e2a\u9879\u76ee', exploreTitle: '\u63a2\u7d22\u5546\u5bb6', exploreSub: '\u9009\u62e9\u9644\u8fd1\u7684\u9910\u996e\u3001\u6d17\u8f66\u3001\u96f6\u552e\u6216\u670d\u52a1', allCategories: '\u5168\u90e8', merchantPlatformReady: '\u5546\u5bb6\u5e73\u53f0\u5df2\u51c6\u5907', merchantPlatformBody: '\u8fd9\u4e2a\u7248\u672c\u652f\u6301\u987e\u5ba2\u6d4f\u89c8\u548c\u5546\u5bb6\u7ba1\u7406\u8ba2\u5355',
+    menuServices: '\u83dc\u5355\u4e0e\u670d\u52a1', popular: '\u70ed\u95e8', checkout: '\u7ed3\u8d26', fulfilment: '\u5c65\u7ea6\u65b9\u5f0f', pickup: '\u81ea\u53d6', service: '\u670d\u52a1', orderSummary: '\u8ba2\u5355\u6458\u8981', customerNote: '\u5ba2\u6237\u5907\u6ce8', notePlaceholder: '\u4f8b\u5982\uff1a\u5c11\u8fa3\u3001\u51c6\u5907\u597d\u540e\u901a\u77e5',
+    paymentMethod: '\u4ed8\u6b3e\u65b9\u5f0f', manualPayment: '\u624b\u52a8 / \u6d4b\u8bd5\u786e\u8ba4', tngPlaceholder: 'Touch \'n Go QR \u5360\u4f4d', bankPlaceholder: '\u94f6\u884c\u8f6c\u8d26\u5360\u4f4d', subtotal: '\u5c0f\u8ba1', platformVoucher: '\u5e73\u53f0\u4f18\u60e0', amountDue: '\u5e94\u4ed8\u91d1\u989d', placeOrder: '\u4e0b\u5355', confirming: '\u786e\u8ba4\u4e2d...', noItemsSelected: '\u8fd8\u6ca1\u6709\u9009\u62e9\u9879\u76ee',
+    orderPlaced: '\u8ba2\u5355\u5df2\u63d0\u4ea4', orderSentMerchant: '\u8ba2\u5355 {id} \u5df2\u53d1\u9001\u7ed9\u5546\u5bb6', allOrders: '\u5168\u90e8\u8ba2\u5355', merchantView: '\u5546\u5bb6\u89c6\u56fe', successTipMarketplace: '\u5546\u5bb6\u66f4\u65b0\u3001\u4ed8\u6b3e\u786e\u8ba4\u548c\u81ea\u53d6\u63d0\u9192\u53ef\u4ee5\u901a\u8fc7 WhatsApp \u53d1\u9001',
+    myOrders: '\u6211\u7684\u8ba2\u5355', ordersSub: '\u7edf\u4e00\u8ffd\u8e2a\u9910\u996e\u3001\u6d17\u8f66\u3001\u96f6\u552e\u548c\u670d\u52a1\u8ba2\u5355', active: '\u8fdb\u884c\u4e2d', history: '\u5386\u53f2', noOrdersHere: '\u8fd9\u91cc\u8fd8\u6ca1\u6709\u8ba2\u5355',
+    merchantConsoleTitle: '\u5546\u5bb6\u7ba1\u7406', merchantConsoleSub: '\u63a5\u5355\u3001\u66f4\u65b0\u72b6\u6001\u548c\u5b8c\u6210 QR / \u670d\u52a1\u8ba2\u5355', demoMerchantName: 'LokalGo Merchant HQ', demoMerchantSub: '\u7ba1\u7406\u4eca\u65e5\u5546\u5bb6\u8ba2\u5355', liveOrders: '\u5373\u65f6\u8ba2\u5355', completed: '\u5df2\u5b8c\u6210', revenue: '\u6536\u5165', orderQueue: '\u8ba2\u5355\u961f\u5217', noActiveOrders: '\u6ca1\u6709\u8fdb\u884c\u4e2d\u8ba2\u5355',
+    accept: '\u63a5\u5355', startPreparing: '\u5f00\u59cb\u5904\u7406', markReady: '\u6807\u8bb0\u5df2\u51c6\u5907', complete: '\u5b8c\u6210', noAddress: '\u6682\u65e0\u5730\u5740', noPaymentMethod: '\u6682\u65e0\u4ed8\u6b3e\u65b9\u5f0f', marketplaceAccount: '\u5e73\u53f0\u8d26\u53f7', activeOrders: '\u8fdb\u884c\u4e2d\u8ba2\u5355', vouchers: '\u4f18\u60e0\u5238', addresses: '\u5730\u5740', merchantMode: '\u5546\u5bb6\u6a21\u5f0f', merchantModeSub: '\u7ba1\u7406\u8ba2\u5355\u548c\u8425\u4e1a\u72b6\u6001', carCareProfile: '\u6d17\u8f66\u8d44\u6599', carCareProfileSub: '\u7528\u4e8e\u6d17\u8f66\u9884\u7ea6\u7684\u8f66\u8f86\u8d44\u6599', explore: '\u63a2\u7d22', marketplaceRebuild: 'Marketplace \u6539\u7248',
   },
   ms: {
-    home: 'Utama',
-    booking: 'Tempah',
-    orders: 'Pesanan',
-    staff: 'Tebus',
-    profile: 'Saya',
-    language: 'Bahasa',
-    chinese: '中文',
-    english: 'English',
-    malay: 'Bahasa Melayu',
-    openNow: 'Dibuka',
-    closed: 'Ditutup',
-    aiCare: 'AI Khidmat / WhatsApp',
-    staffDesk: 'Penebusan staf',
-    fastestBooking: 'Slot terpantas',
-    queueCars: 'Giliran',
-    estimatedWait: 'Anggaran tunggu',
-    outletRating: 'Penilaian',
-    bookWashNow: 'Tempah cuci kereta',
-    myPass: 'Pas bulanan saya',
-    timesAvailable: '{left}/{total} cucian lagi',
-    serviceCategories: 'Servis',
-    mapQueueStatus: 'Peta dan status giliran',
-    askAi: 'Tanya AI',
-    promo: 'Promosi',
-    notificationsWhatsapp: 'Notifikasi & WhatsApp',
-    aiPanelBody: 'Peringatan tempahan, bayaran, dan aduan diurus di sini.',
-    aiFastestReply: 'AI: JagaWash Kepong paling cepat, anggaran tunggu 12 minit.',
-    bookingTitle: 'Tempah servis',
-    bookingSub: 'Pilih servis dan mula tempahan',
-    chooseServiceType: 'Pilih jenis servis',
-    bookingFlow: 'Aliran tempahan',
-    selected: 'Dipilih',
-    startBooking: 'Mula tempahan',
-    fromPrice: 'Dari RM{price}',
-    free: 'Percuma',
-    step1Title: 'Pilih pakej dan jenis kereta',
-    step1Desc: 'Pilih ikut kenderaan dan tambah servis',
-    step2Title: 'Pilih cawangan dan masa',
-    step2Desc: 'Tempah cawangan berdekatan dengan masa fleksibel',
-    step3Title: 'Bayar dalam talian',
-    step3Desc: 'TnG / Kad / FPX',
-    step4Title: 'Tebus di kedai',
-    step4Desc: 'Tunjukkan kod QR pesanan untuk tebus',
-    ordersTitle: 'Pesanan saya',
-    inProgress: 'Aktif',
-    completed: 'Selesai',
-    noOrders: 'Tiada pesanan',
-    pendingArrival: 'Perlu hadir',
-    done: 'Selesai',
-    reschedule: 'Tukar masa',
-    redeemQr: 'QR tebus',
-    review: 'Ulasan',
-    bookAgain: 'Tempah lagi',
-    staffSub: 'Tempahan hari ini, penebusan QR, kemas kini pesanan',
-    scanRedeem: 'Tebus QR',
-    staffDemo: 'Mod demo: tekan pesanan untuk simulasi tebus.',
-    todayBookings: 'Tempahan hari ini',
-    allDoneToday: 'Semua tempahan selesai',
-    pendingRedeem: 'Menunggu',
-    scanDone: 'Selesaikan',
-    redeemedToast: 'Pesanan {id} ditebus dan ditanda selesai',
-    points: 'Mata',
-    remainingWash: 'Cucian lagi',
-    coupons: 'Kupon',
-    myVehicles: 'Kenderaan saya',
-    paymentMethods: 'Cara bayaran',
-    addressBook: 'Alamat',
-    whatsappAiCare: 'WhatsApp / AI',
-    complaintCenter: 'Pusat aduan',
-    settings: 'Tetapan',
-    availableCoupons: '{count} tersedia',
-    supportMenuSub: 'Tempahan, bayaran, aduan',
-    complaintMenuSub: 'Susulan isu servis',
-    demoEntryToast: '{label}: demo telah disambung',
-    vehicleToast: 'Pengurusan kenderaan sedang dibangunkan',
-    packageIncluded: 'Termasuk dalam pakej',
-    chooseVehicle: 'Pilih jenis kenderaan',
-    addOns: 'Servis tambahan',
-    total: 'Jumlah',
-    chooseOutletSlot: 'Pilih cawangan dan masa',
-    none: 'Tiada',
-    confirmOrder: 'Sahkan pesanan',
-    confirmSub: 'Semak butiran dan bayar',
-    addOnPrefix: 'Tambahan: {addons}',
-    outlet: 'Cawangan',
-    date: 'Tarikh',
-    timeSlot: 'Masa',
-    paymentMethod: 'Cara bayaran',
-    serviceFee: 'Caj servis',
-    platformDiscount: 'Diskaun platform',
-    amountDue: 'Jumlah perlu dibayar',
-    payNow: 'Bayar sekarang',
-    paying: 'Sedang bayar...',
-    paid: 'Dibayar',
-    successTitle: 'Bayaran berjaya',
-    successSub: 'Pesanan {id} disahkan',
-    successTip: 'Peringatan tempahan, notifikasi bayaran, dan pautan QR telah disimulasikan ke WhatsApp.',
-    viewAllOrders: 'Lihat semua pesanan',
-    viewQr: 'Lihat kod QR',
-    orderDetail: 'Butiran pesanan',
-    orderMissing: 'Pesanan tidak ditemui',
-    pendingRedeemLong: 'Menunggu tebus di kedai',
-    qrDoneHint: 'Pesanan ini telah selesai',
-    qrVisitHint: 'Tunjukkan kod QR ini kepada staf',
-    bookingTime: 'Masa tempahan',
-    paymentStatus: 'Status bayaran',
-    orderNo: 'No. pesanan',
-    serviceReview: 'Ulasan servis',
-    noReviewYet: 'Belum ada ulasan untuk servis ini.',
-    complaintRecord: 'Aduan: {complaint}',
-    complaint: 'Aduan',
-    rateAndComment: 'Penilaian dan komen',
-    redeeming: 'Menebus...',
-    simulateRedeem: 'Simulasi tebus QR',
-    chooseNewSlot: 'Pilih tarikh dan masa baru',
-    confirmReschedule: 'Sahkan tukar masa',
-    submitReview: 'Hantar ulasan',
-    complaintEntry: 'Borang aduan',
-    submitComplaint: 'Hantar aduan',
-    rescheduledToast: 'Masa berjaya ditukar. Peringatan akan dihantar melalui WhatsApp.',
-    redeemSuccessToast: 'Berjaya ditebus. Status pesanan dikemas kini.',
-    reviewToast: 'Ulasan dihantar. Terima kasih.',
-    complaintToast: 'Aduan dihantar. AI akan susul melalui WhatsApp.',
-    defaultReview: 'Servis lancar dan staf cawangan mesra.',
-    defaultComplaint: 'Terangkan isu yang dihadapi. Kami akan susul melalui WhatsApp.',
-    promoCampaign: 'Promosi',
-    quoteComingToast: 'Fungsi sebut harga akan datang',
-    freeQuote: 'Sebut harga percuma',
-    saveAmount: 'Jimat RM{amount}',
-    promoBenefits: 'Manfaat',
-    promoTerms: 'Terma',
-    promoPrice: 'Harga promosi',
-    limitedOffer: 'Tawaran terhad',
-    zeroQuote: 'Sebut harga RM0',
-    cardDebit: 'Kad kredit / debit',
-    fpxBank: 'Perbankan FPX',
+    ...en,
+    home: 'Laman', booking: 'Teroka', orders: 'Pesanan', staff: 'Peniaga', profile: 'Saya', language: 'Bahasa',
+    points: 'Mata', remainingWash: 'Pesanan aktif', coupons: 'Baucar', myVehicles: 'Profil penjagaan kereta',
+    paymentMethods: 'Kaedah pembayaran', addressBook: 'Alamat', whatsappAiCare: 'WhatsApp / Khidmat AI', complaintCenter: 'Pusat aduan',
+    settings: 'Tetapan', availableCoupons: '{count} tersedia', logout: 'Log keluar', openNow: 'Dibuka', closed: 'Ditutup',
+    add: 'Tambah', save: 'Simpan', delete: 'Padam', cancel: 'Batal', usable: 'Boleh digunakan', used: 'Telah digunakan', expired: 'Tamat tempoh',
+    quickQueue: 'Masa menunggu peniaga', quickPayment: 'Status bayaran', quickChangeBooking: 'Ubah pesanan', quickComplaintFollow: 'Susulan aduan', supportSeedHello: 'Hai, saya boleh bantu semak masa menunggu peniaga, perubahan pesanan, status bayaran dan aduan.', aiQueueReply: 'SparkWash Kepong paling cepat sekarang, manakala ambil sendiri makanan sekitar 18 minit.', aiPaymentReply: 'Bayaran masih dalam mod demo / pengesahan manual. TnG, FPX dan pindahan bank boleh disambungkan apabila akaun peniaga sudah sedia.', aiComplaintReply: 'Anda boleh membuka tiket aduan di sini. Khidmat AI boleh terus membantu susulan melalui WhatsApp.', aiChangeReply: 'Untuk pesanan ambil sendiri, hubungi peniaga sebelum pesanan ditanda sedia. Untuk tempahan, pilih slot baharu dari halaman butiran pesanan.', aiDefaultReply: 'Saya boleh bantu dengan perubahan pesanan, masa menunggu peniaga, pengesahan bayaran dan susulan aduan.',
+    savedToast: 'Disimpan.', deletedToast: 'Dipadam.', requiredFields: 'Sila lengkapkan maklumat yang diperlukan.',
+    login: 'Log masuk', loginTitle: 'Log masuk', registerTitle: 'Cipta akaun', fullName: 'Nama penuh', phoneNumber: 'Nombor telefon', pinCode: 'PIN 4 digit', createAccount: 'Cipta akaun',
+    merchantTimeline: 'Perjalanan pesanan', completeRedeem: 'Lengkapkan / tebus', moveToStatus: 'Tukar kepada {status}', orderUpdatedToast: 'Pesanan {id} dikemas kini kepada {status}.', qrCompleted: 'Pesanan ini telah selesai.', qrHintMerchant: 'Tunjukkan QR ini kepada peniaga apabila diperlukan.', voucher: 'Baucar', note: 'Nota', reviews: '{count} ulasan', inQueue: '{count} dalam giliran', itemCount: '{count} item',
+    searchPlaceholder: 'Cari makanan, cucian, kedai', merchantTools: 'Alat peniaga', todayOverview: 'Ringkasan hari ini', readyOrders: 'Pesanan sedia', preparingOrders: 'Sedang disediakan', marketplace: 'Pasaran', homeHeroTitle: 'Cuci kereta, makanan dan peniaga tempatan dalam satu app.', homeHeroSub: 'Cari peniaga berdekatan, buat pesanan ambil sendiri, tempah servis dan urus giliran peniaga.', fastestNow: 'Paling cepat: {name} - {mins} min', chooseCategory: 'Pilih kategori', viewAll: 'Lihat semua', featuredMerchants: 'Peniaga pilihan', nearbyNow: 'Berdekatan', promos: 'Promosi', notificationsWhatsapp: 'Notifikasi & WhatsApp',
+    exploreTitle: 'Teroka peniaga', exploreSub: 'Pilih makanan, penjagaan kereta, runcit atau servis berdekatan.', allCategories: 'Semua', merchantPlatformReady: 'Platform peniaga sedia', merchantPlatformBody: 'Versi ini menyokong pelanggan melayari dan peniaga mengemas kini pesanan.',
+    menuServices: 'Menu & servis', popular: 'Popular', checkout: 'Bayar', fulfilment: 'Kaedah pesanan', pickup: 'Ambil sendiri', service: 'Servis', orderSummary: 'Ringkasan pesanan', customerNote: 'Nota pelanggan', notePlaceholder: 'Contoh: kurang pedas, hubungi bila siap', paymentMethod: 'Kaedah pembayaran', manualPayment: 'Pengesahan manual / ujian', tngPlaceholder: "Ruang Touch 'n Go QR", bankPlaceholder: 'Ruang pindahan bank', subtotal: 'Jumlah kecil', platformVoucher: 'Baucar platform', amountDue: 'Jumlah perlu dibayar', placeOrder: 'Hantar pesanan', confirming: 'Mengesahkan...', noItemsSelected: 'Tiada item dipilih.',
+    orderPlaced: 'Pesanan dihantar', orderSentMerchant: 'Pesanan {id} telah dihantar kepada peniaga.', allOrders: 'Semua pesanan', merchantView: 'Paparan peniaga', successTipMarketplace: 'Kemas kini peniaga, pengesahan bayaran dan peringatan ambil sendiri boleh dihantar melalui WhatsApp.',
+    myOrders: 'Pesanan saya', ordersSub: 'Jejaki makanan, penjagaan kereta, runcit dan servis di satu tempat.', active: 'Aktif', history: 'Sejarah', noOrdersHere: 'Tiada pesanan di sini.', merchantConsoleTitle: 'Konsol peniaga', merchantConsoleSub: 'Terima pesanan, kemas kini status dan lengkapkan pesanan QR/servis.', demoMerchantName: 'Pusat Peniaga LokalGo', demoMerchantSub: 'Mengurus pesanan peniaga hari ini', liveOrders: 'Pesanan aktif', completed: 'Selesai', revenue: 'Hasil', orderQueue: 'Giliran pesanan', noActiveOrders: 'Tiada pesanan aktif.',
+    accept: 'Terima', startPreparing: 'Mula sediakan', markReady: 'Tanda siap', complete: 'Selesai', noAddress: 'Tiada alamat', noPaymentMethod: 'Tiada kaedah bayaran', marketplaceAccount: 'Akaun pasaran', activeOrders: 'Pesanan aktif', vouchers: 'Baucar', addresses: 'Alamat', merchantMode: 'Mod peniaga', merchantModeSub: 'Urus pesanan dan status', carCareProfile: 'Profil penjagaan kereta', carCareProfileSub: 'Maklumat kenderaan untuk tempahan cuci', explore: 'Teroka', marketplaceRebuild: 'Binaan semula pasaran', walletBalance: 'Baki dompet', scanPay: 'Imbas & bayar', rewards: 'Ganjaran', premiumPicks: 'Pilihan premium', quickActions: 'Aksi pantas', ordersToday: 'Pesanan hari ini', settlement: 'Penyelesaian', businessAccount: 'Akaun perniagaan', qrCounter: 'Kaunter QR', merchantInsights: 'Cerapan peniaga', topMerchant: 'Peniaga popular', sponsored: 'Ditaja',
   },
 };
 
-const servicesByLang: Record<Language, Record<ServiceId, { name: string; desc: string }>> = {
-  zh: {
-    wash: { name: '洗车', desc: '自动洗车 · 免费吸尘' },
-    tyre: { name: '轮胎保养', desc: '换胎 · 定位 · 快速检查' },
-    detail: { name: '美容护理', desc: '内外清洁 · 镀膜护理' },
-  },
-  en: {
-    wash: { name: 'Car wash', desc: 'Auto wash · Free vacuum' },
-    tyre: { name: 'Tyre care', desc: 'Tyres · Alignment · Quick check' },
-    detail: { name: 'Detailing', desc: 'Interior care · Coating' },
-  },
-  ms: {
-    wash: { name: 'Cuci kereta', desc: 'Cuci automatik · Vakum percuma' },
-    tyre: { name: 'Penjagaan tayar', desc: 'Tayar · Alignment · Pemeriksaan' },
-    detail: { name: 'Perincian', desc: 'Dalaman · Salutan' },
-  },
+const serviceCopy: Record<Language, Record<ServiceId, { name: string; desc: string }>> = {
+  en: { wash: { name: 'Car wash', desc: 'Wash and vacuum' }, tyre: { name: 'Tyre care', desc: 'Alignment and inspection' }, detail: { name: 'Detailing', desc: 'Interior and polish' } },
+  zh: { wash: { name: '\u6d17\u8f66', desc: '\u6e05\u6d17\u4e0e\u5438\u5c18' }, tyre: { name: '\u8f6e\u80ce\u4fdd\u517b', desc: '\u5b9a\u4f4d\u4e0e\u68c0\u67e5' }, detail: { name: '\u7f8e\u5bb9\u62a4\u7406', desc: '\u5185\u9970\u4e0e\u6253\u8721' } },
+  ms: { wash: { name: 'Cuci kereta', desc: 'Cuci dan vakum' }, tyre: { name: 'Penjagaan tayar', desc: 'Penjajaran dan pemeriksaan' }, detail: { name: 'Perincian kereta', desc: 'Dalaman dan gilap' } },
 };
 
-const outletNames: Record<Language, Record<string, string>> = {
-  zh: { o1: 'JagaWash 甲洞店', o2: 'JagaWash Segambut', o3: 'JagaTyre 轮胎中心' },
-  en: { o1: 'JagaWash Kepong', o2: 'JagaWash Segambut', o3: 'JagaTyre Centre' },
-  ms: { o1: 'JagaWash Kepong', o2: 'JagaWash Segambut', o3: 'Pusat JagaTyre' },
-};
-
-const orderServices: Record<Language, Record<string, string>> = {
-  zh: { wash: '自动洗车 + 吸尘', tyre: '四轮定位', detail: '美容护理（小车）' },
-  en: { wash: 'Auto wash + vacuum', tyre: 'Wheel alignment', detail: 'Detailing (sedan)' },
-  ms: { wash: 'Cuci automatik + vakum', tyre: 'Alignment tayar', detail: 'Perincian (sedan)' },
-};
-
-const promoCopy: Record<Language, Record<string, { title: string; sub: string; fullTitle: string; tag: string; unit: string; cta: string; bullets: string[]; terms: string[] }>> = {
-  zh: {
-    p1: {
-      title: 'RM50 / 月\n无限洗',
-      sub: '适合高频用车',
-      fullTitle: 'JagaWash 月卡',
-      tag: '月卡',
-      unit: '/月',
-      cta: '开通月卡',
-      bullets: ['30 天内不限次数洗车', '同一车辆不限大车小车', '含高压冲洗、泡沫和风干', '会员快速通道'],
-      terms: ['有效期为开通起 30 天', '限本人车辆使用', '到店出示会员二维码核销', '不可转让或退款'],
-    },
-    p2: {
-      title: 'RM1\n新客体验',
-      sub: '第一次洗车更轻松',
-      fullTitle: 'RM1 新客体验洗车',
-      tag: '新客',
-      unit: '/次',
-      cta: 'RM1 抢购',
-      bullets: ['仅限新用户首单', '24 小时门店可用', '标准自动洗车一次', '包含免费内部吸尘'],
-      terms: ['每个新账号限购 1 次', '需在 7 天内到店使用', '到店出示订单二维码', '不与其他优惠同享'],
-    },
-  },
-  en: {
-    p1: {
-      title: 'RM50 / month\nUnlimited wash',
-      sub: 'Best for frequent drivers',
-      fullTitle: 'JagaWash monthly pass',
-      tag: 'Pass',
-      unit: '/month',
-      cta: 'Subscribe',
-      bullets: ['Unlimited washes for 30 days', 'Same vehicle, any size', 'High-pressure rinse, foam, and air dry included', 'Member express lane'],
-      terms: ['Valid for 30 days from activation', 'For your own vehicle only', 'Show member QR in store to redeem', 'Not transferable or refundable'],
-    },
-    p2: {
-      title: 'RM1\nNew user trial',
-      sub: 'An easy first wash',
-      fullTitle: 'RM1 first wash trial',
-      tag: 'New user',
-      unit: '/visit',
-      cta: 'Buy RM1 deal',
-      bullets: ['For first order only', 'Available at 24-hour outlets', 'One standard auto wash', 'Includes free interior vacuum'],
-      terms: ['One purchase per new account', 'Use within 7 days', 'Show order QR in store', 'Cannot be combined with other promos'],
-    },
-  },
-  ms: {
-    p1: {
-      title: 'RM50 / bulan\nCuci tanpa had',
-      sub: 'Sesuai untuk pemandu kerap',
-      fullTitle: 'Pas bulanan JagaWash',
-      tag: 'Pas',
-      unit: '/bulan',
-      cta: 'Langgan pas',
-      bullets: ['Cucian tanpa had selama 30 hari', 'Kenderaan sama, semua saiz', 'Termasuk bilas tekanan tinggi, buih, dan pengeringan', 'Laluan ekspres ahli'],
-      terms: ['Sah 30 hari dari tarikh aktif', 'Untuk kenderaan sendiri sahaja', 'Tunjukkan QR ahli di kedai', 'Tidak boleh dipindah atau dipulangkan'],
-    },
-    p2: {
-      title: 'RM1\nCubaan pengguna baru',
-      sub: 'Cucian pertama yang mudah',
-      fullTitle: 'Cubaan cuci RM1',
-      tag: 'Baru',
-      unit: '/kali',
-      cta: 'Beli promosi RM1',
-      bullets: ['Untuk pesanan pertama sahaja', 'Boleh digunakan di cawangan 24 jam', 'Satu cucian automatik standard', 'Termasuk vakum dalaman percuma'],
-      terms: ['Satu pembelian setiap akaun baru', 'Guna dalam 7 hari', 'Tunjukkan QR pesanan di kedai', 'Tidak boleh digabung dengan promosi lain'],
-    },
-  },
-};
-
-const vehicleSpecs: Record<Language, Record<string, { name: string }>> = {
-  zh: { sedan: { name: '小型车 / 轿车' }, suv: { name: 'SUV / MPV' }, big: { name: '大型车 / 商用' } },
-  en: { sedan: { name: 'Compact / sedan' }, suv: { name: 'SUV / MPV' }, big: { name: 'Large / commercial' } },
-  ms: { sedan: { name: 'Kompak / sedan' }, suv: { name: 'SUV / MPV' }, big: { name: 'Besar / komersial' } },
+const vehicleSpecs: Record<Language, Record<string, string>> = {
+  en: { sedan: 'Sedan', suv: 'SUV / MPV', big: 'Large vehicle' },
+  zh: { sedan: '\u8f7f\u8f66', suv: 'SUV / MPV', big: '\u5927\u578b\u8f66\u8f86' },
+  ms: { sedan: 'Sedan', suv: 'SUV / MPV', big: 'Kenderaan besar' },
 };
 
 const addOns: Record<Language, Record<string, { name: string; desc: string }>> = {
-  zh: {
-    vacuum: { name: '内部吸尘', desc: '座椅+地毯深度吸尘' },
-    wax: { name: '快速打蜡', desc: '车漆增亮保护' },
-    tyre: { name: '轮胎上光', desc: '轮胎黑亮如新' },
-    fragrance: { name: '车内香氛', desc: '7 天清新留香' },
-  },
+  en: { vacuum: { name: 'Interior vacuum', desc: 'Included with selected packages' }, wax: { name: 'Quick wax', desc: 'Extra shine' }, tyre: { name: 'Tyre shine', desc: 'Clean tyre wall' }, fragrance: { name: 'Cabin fragrance', desc: 'Fresh cabin scent' } },
+  zh: { vacuum: { name: '\u8f66\u5185\u5438\u5c18', desc: '\u90e8\u5206\u5957\u9910\u5df2\u5305\u542b' }, wax: { name: '\u5feb\u901f\u6253\u8721', desc: '\u63d0\u5347\u4eae\u5ea6' }, tyre: { name: '\u8f6e\u80ce\u4e0a\u5149', desc: '\u6e05\u6d01\u8f6e\u80ce' }, fragrance: { name: '\u8f66\u5185\u9999\u6c1b', desc: '\u4fdd\u6301\u6e05\u65b0' } },
+  ms: { vacuum: { name: 'Vakum dalaman', desc: 'Termasuk pakej tertentu' }, wax: { name: 'Lilin pantas', desc: 'Kilatan tambahan' }, tyre: { name: 'Kilatan tayar', desc: 'Bersihkan tayar' }, fragrance: { name: 'Pewangi kabin', desc: 'Bau kabin segar' } },
+};
+
+const included: Record<Language, string[]> = {
+  en: ['Pre-rinse', 'Foam wash', 'Rim cleaning', 'Clean water rinse', 'Air dry', 'Basic check'],
+  zh: ['\u9884\u51b2\u6d17', '\u6ce1\u6cab\u6e05\u6d17', '\u8f6e\u5708\u6e05\u6d01', '\u6e05\u6c34\u51b2\u6d17', '\u98ce\u5e72', '\u57fa\u7840\u68c0\u67e5'],
+  ms: ['Pra-bilas', 'Cucian buih', 'Cucian rim', 'Bilas air bersih', 'Pengeringan udara', 'Pemeriksaan asas'],
+};
+
+const categoryCopy: Record<Language, Record<string, { name: string; subtitle: string }>> = {
   en: {
-    vacuum: { name: 'Interior vacuum', desc: 'Deep seat and carpet vacuum' },
-    wax: { name: 'Quick wax', desc: 'Gloss and paint protection' },
-    tyre: { name: 'Tyre shine', desc: 'Fresh black tyre finish' },
-    fragrance: { name: 'Cabin fragrance', desc: 'Fresh scent for 7 days' },
+    'car-care': { name: 'Car care', subtitle: 'Wash, tyres, detailing' },
+    food: { name: 'Food', subtitle: 'Restaurants and cafes' },
+    retail: { name: 'Retail', subtitle: 'Shops and convenience' },
+    services: { name: 'Services', subtitle: 'Beauty, repair, errands' },
+  },
+  zh: {
+    'car-care': { name: '\u6d17\u8f66\u4fdd\u517b', subtitle: '\u6d17\u8f66\u3001\u8f6e\u80ce\u3001\u7f8e\u5bb9' },
+    food: { name: '\u9910\u996e', subtitle: '\u9910\u5385\u4e0e\u5496\u5561\u5e97' },
+    retail: { name: '\u96f6\u552e', subtitle: '\u5546\u5e97\u4e0e\u4fbf\u5229\u5e97' },
+    services: { name: '\u672c\u5730\u670d\u52a1', subtitle: '\u7f8e\u5bb9\u3001\u7ef4\u4fee\u3001\u4ee3\u529e' },
   },
   ms: {
-    vacuum: { name: 'Vakum dalaman', desc: 'Vakum kerusi dan karpet' },
-    wax: { name: 'Wax pantas', desc: 'Kilau dan lindung cat' },
-    tyre: { name: 'Kilau tayar', desc: 'Tayar hitam seperti baru' },
-    fragrance: { name: 'Pewangi kabin', desc: 'Haruman segar 7 hari' },
+    'car-care': { name: 'Penjagaan kereta', subtitle: 'Cucian, tayar dan detailing' },
+    food: { name: 'Makanan', subtitle: 'Restoran dan kafe' },
+    retail: { name: 'Runcit', subtitle: 'Kedai dan barangan harian' },
+    services: { name: 'Perkhidmatan', subtitle: 'Dandanan, baik pulih dan urusan' },
   },
 };
 
-const includedItems: Record<Language, string[]> = {
-  zh: ['高压预冲洗', '泡沫清洁', '轮毂清洗', '清水冲洗', '风干', '免费吸尘'],
-  en: ['High-pressure pre-rinse', 'Foam wash', 'Rim cleaning', 'Clean water rinse', 'Air dry', 'Free vacuum'],
-  ms: ['Pra-bilas tekanan tinggi', 'Cucian buih', 'Cuci rim', 'Bilas air bersih', 'Pengeringan', 'Vakum percuma'],
+const merchantHeroCopy: Record<Language, Record<string, string>> = {
+  en: {
+    'm-wash-kepong': 'Fast lane car wash',
+    'm-nasi-lemak': 'Local meals ready for pickup',
+    'm-kopi': 'Coffee and pastries',
+    'm-mini-mart': 'Daily essentials',
+    'm-barber': 'Appointments and walk-ins',
+  },
+  zh: {
+    'm-wash-kepong': '\u5feb\u901f\u901a\u9053\u6d17\u8f66',
+    'm-nasi-lemak': '\u672c\u5730\u7f8e\u98df\u81ea\u53d6',
+    'm-kopi': '\u5496\u5561\u4e0e\u70d8\u7119',
+    'm-mini-mart': '\u65e5\u5e38\u5fc5\u9700\u54c1',
+    'm-barber': '\u9884\u7ea6\u4e0e\u73b0\u573a\u670d\u52a1',
+  },
+  ms: {
+    'm-wash-kepong': 'Cucian kereta laluan pantas',
+    'm-nasi-lemak': 'Hidangan tempatan sedia untuk ambil sendiri',
+    'm-kopi': 'Kopi dan pastri',
+    'm-mini-mart': 'Keperluan harian',
+    'm-barber': 'Temujanji dan pelanggan walk-in',
+  },
 };
 
-const dateLabels: Record<Language, Record<string, string>> = {
-  zh: { today: '今天', tomorrow: '明天', afterTomorrow: '后天', wed: '周三', thu: '周四', fri: '周五', sat: '周六', sun: '周日', mon: '周一' },
-  en: { today: 'Today', tomorrow: 'Tomorrow', afterTomorrow: 'After tomorrow', wed: 'Wed', thu: 'Thu', fri: 'Fri', sat: 'Sat', sun: 'Sun', mon: 'Mon' },
-  ms: { today: 'Hari ini', tomorrow: 'Esok', afterTomorrow: 'Lusa', wed: 'Rab', thu: 'Kha', fri: 'Jum', sat: 'Sab', sun: 'Aha', mon: 'Isn' },
+const catalogCopy: Record<Language, Record<string, CatalogCopy>> = {
+  en: {
+    'wash-basic': { name: 'Express wash', desc: 'Exterior wash and quick dry' },
+    'wash-vacuum': { name: 'Wash + vacuum', desc: 'Exterior wash with interior vacuum' },
+    'detail-small': { name: 'Mini detailing', desc: 'Interior wipe, wax shine, tyre dressing' },
+    'nasi-classic': { name: 'Classic nasi lemak', desc: 'Rice, sambal, egg, peanuts, anchovies' },
+    'ayam-rempah': { name: 'Ayam rempah set', desc: 'Spiced fried chicken with nasi lemak' },
+    'kopi-o': { name: 'Kopi O ais', desc: 'Local iced black coffee' },
+    latte: { name: 'Cafe latte', desc: 'Fresh espresso with steamed milk' },
+    'mart-snack': { name: 'Snack bundle', desc: 'Chips, drink and tissue pack' },
+    'mart-water': { name: 'Mineral water 6-pack', desc: 'Pickup-ready household pack' },
+    'barber-cut': { name: 'Classic haircut', desc: 'Men haircut with styling' },
+    'barber-shave': { name: 'Haircut + shave', desc: 'Full grooming appointment' },
+  },
+  zh: {
+    'wash-basic': { name: '\u5feb\u901f\u6d17\u8f66', desc: '\u5916\u89c2\u6e05\u6d17\u4e0e\u5feb\u901f\u98ce\u5e72' },
+    'wash-vacuum': { name: '\u6d17\u8f66 + \u5438\u5c18', desc: '\u5916\u89c2\u6e05\u6d17\u52a0\u8f66\u5185\u5438\u5c18' },
+    'detail-small': { name: '\u8f7b\u7f8e\u5bb9\u62a4\u7406', desc: '\u5185\u9970\u64e6\u62ed\u3001\u4e0a\u8721\u3001\u8f6e\u80ce\u4e0a\u5149' },
+    'nasi-classic': { name: '\u7ecf\u5178\u6930\u6d46\u996d', desc: '\u7c73\u996d\u3001\u53c1\u5df4\u3001\u9e21\u86cb\u3001\u82b1\u751f\u3001\u6c5f\u9c7c\u4ed4' },
+    'ayam-rempah': { name: '\u9999\u6599\u70b8\u9e21\u5957\u9910', desc: '\u9999\u6599\u70b8\u9e21\u914d\u6930\u6d46\u996d' },
+    'kopi-o': { name: '\u51b0\u5496\u5561 O', desc: '\u672c\u5730\u51b0\u9ed1\u5496\u5561' },
+    latte: { name: '\u62ff\u94c1\u5496\u5561', desc: '\u73b0\u716e\u6d53\u7f29\u5496\u5561\u914d\u84b8\u5976' },
+    'mart-snack': { name: '\u96f6\u98df\u5957\u88c5', desc: '\u85af\u7247\u3001\u996e\u6599\u548c\u7eb8\u5dfe\u5957\u88c5' },
+    'mart-water': { name: '\u77ff\u6cc9\u6c34 6 \u652f\u88c5', desc: '\u53ef\u81ea\u53d6\u7684\u5bb6\u7528\u88c5' },
+    'barber-cut': { name: '\u7ecf\u5178\u7406\u53d1', desc: '\u7537\u58eb\u7406\u53d1\u4e0e\u9020\u578b' },
+    'barber-shave': { name: '\u7406\u53d1 + \u4fee\u9762', desc: '\u5168\u5957\u7537\u58eb\u4fee\u62a4\u9884\u7ea6' },
+  },
+  ms: {
+    'wash-basic': { name: 'Cucian ekspres', desc: 'Cucian luaran dan pengeringan pantas' },
+    'wash-vacuum': { name: 'Cuci + vakum', desc: 'Cucian luaran bersama vakum dalaman' },
+    'detail-small': { name: 'Detailing ringan', desc: 'Lap dalaman, kilatan lilin dan rawatan tayar' },
+    'nasi-classic': { name: 'Nasi lemak klasik', desc: 'Nasi, sambal, telur, kacang dan ikan bilis' },
+    'ayam-rempah': { name: 'Set ayam rempah', desc: 'Ayam goreng berempah bersama nasi lemak' },
+    'kopi-o': { name: 'Kopi O ais', desc: 'Kopi hitam ais tempatan' },
+    latte: { name: 'Kafe latte', desc: 'Espresso segar bersama susu kukus' },
+    'mart-snack': { name: 'Set snek', desc: 'Kerepek, minuman dan pek tisu' },
+    'mart-water': { name: 'Air mineral 6 botol', desc: 'Pek isi rumah sedia untuk ambil sendiri' },
+    'barber-cut': { name: 'Gunting rambut klasik', desc: 'Gunting rambut lelaki bersama gaya' },
+    'barber-shave': { name: 'Gunting + cukur', desc: 'Temujanji dandanan penuh' },
+  },
+};
+
+const statusCopy: Record<Language, Record<MarketplaceStatus, string>> = {
+  en: { new: 'New', accepted: 'Accepted', preparing: 'Preparing', ready: 'Ready', completed: 'Completed', cancelled: 'Cancelled' },
+  zh: { new: '\u65b0\u8ba2\u5355', accepted: '\u5df2\u63a5\u5355', preparing: '\u5904\u7406\u4e2d', ready: '\u5df2\u51c6\u5907', completed: '\u5df2\u5b8c\u6210', cancelled: '\u5df2\u53d6\u6d88' },
+  ms: { new: 'Pesanan baharu', accepted: 'Diterima', preparing: 'Sedang disediakan', ready: 'Sedia', completed: 'Selesai', cancelled: 'Dibatalkan' },
+};
+
+const fulfilmentCopy: Record<Language, Record<FulfilmentMode, string>> = {
+  en: { booking: 'Booking', pickup: 'Pickup', service: 'Service' },
+  zh: { booking: '\u9884\u7ea6', pickup: '\u81ea\u53d6', service: '\u670d\u52a1' },
+  ms: { booking: 'Tempahan', pickup: 'Ambil sendiri', service: 'Servis' },
+};
+
+const promoCopy: Record<Language, Record<string, Partial<Promo>>> = {
+  en: {},
+  zh: {
+    p1: { title: '\u81ea\u53d6\u7701 RM2', sub: '\u9910\u996e\u4e0e\u96f6\u552e\u5546\u5bb6', tag: '\u81ea\u53d6', fullTitle: '\u81ea\u53d6\u4f18\u60e0', ctaText: '\u4f7f\u7528\u4f18\u60e0', bullets: ['RM20 \u4ee5\u4e0a\u81ea\u53d6\u8ba2\u5355\u53ef\u7528', '\u7ed3\u8d26\u65f6\u81ea\u52a8\u5957\u7528'], terms: ['\u5e02\u573a\u9884\u89c8\u7248\u793a\u8303\u4f18\u60e0'] },
+    p2: { title: '\u6d17\u8f66\u4f18\u60e0', sub: '\u5feb\u901f\u901a\u9053\u9884\u7ea6', tag: '\u6d17\u8f66', fullTitle: '\u6d17\u8f66\u4fdd\u517b\u4f18\u60e0', ctaText: '\u7acb\u5373\u9884\u7ea6', bullets: ['\u4ec5\u9650\u6307\u5b9a\u5546\u5bb6'], terms: ['\u4ee5\u5546\u5bb6\u53ef\u7528\u65f6\u95f4\u4e3a\u51c6'] },
+  },
+  ms: {
+    p1: { title: 'Diskaun RM2 ambil sendiri', sub: 'Untuk peniaga makanan dan runcit', tag: 'Ambil sendiri', fullTitle: 'Penjimatan Ambil Sendiri', ctaText: 'Guna baucar', bullets: ['Sah untuk pesanan ambil sendiri melebihi RM20', 'Digunakan secara automatik semasa bayaran'], terms: ['Baucar demo untuk pratonton marketplace'] },
+    p2: { title: 'Promosi cuci kereta', sub: 'Temujanji laluan pantas', tag: 'Penjagaan kereta', fullTitle: 'Promosi Penjagaan Kereta', ctaText: 'Tempah sekarang', bullets: ['Untuk peniaga terpilih sahaja'], terms: ['Tertakluk kepada ketersediaan peniaga'] },
+  },
 };
 
 const notificationCopy: Record<Language, Record<string, NotificationCopy>> = {
+  en: {},
   zh: {
-    n1: { title: '预约提醒', body: '明天 14:30 到 JagaWash 甲洞店洗车，请提前 10 分钟到店。' },
-    n2: { title: 'WhatsApp 已发送', body: '付款成功通知和二维码链接已发送到你的 WhatsApp。' },
-    n3: { title: 'AI 客服', body: '可以询问改期、排队时间、门店营业状态和投诉进度。' },
-  },
-  en: {
-    n1: { title: 'Booking reminder', body: 'Wash at JagaWash Kepong tomorrow 14:30. Please arrive 10 minutes early.' },
-    n2: { title: 'WhatsApp sent', body: 'Payment success notice and QR link were sent to your WhatsApp.' },
-    n3: { title: 'AI Care', body: 'Ask about rescheduling, queue time, outlet status, and complaint progress.' },
+    n1: { title: '\u8ba2\u5355\u5df2\u63a5\u53d7', body: 'Nasi Lemak Station \u5df2\u63a5\u53d7\u60a8\u7684\u81ea\u53d6\u8ba2\u5355' },
+    n2: { title: '\u5546\u5bb6\u66f4\u65b0', body: 'SparkWash Kepong \u76ee\u524d\u6709 3 \u8f86\u8f66\u6392\u961f\uff0c\u9884\u8ba1 12 \u5206\u949f' },
+    n3: { title: 'WhatsApp \u5ba2\u670d', body: '\u4ed8\u6b3e\u786e\u8ba4\u548c\u8ba2\u5355\u63d0\u9192\u53ef\u4ee5\u901a\u8fc7 WhatsApp \u53d1\u9001' },
   },
   ms: {
-    n1: { title: 'Peringatan tempahan', body: 'Cuci di JagaWash Kepong esok 14:30. Sila tiba 10 minit awal.' },
-    n2: { title: 'WhatsApp dihantar', body: 'Notifikasi bayaran dan pautan QR telah dihantar ke WhatsApp anda.' },
-    n3: { title: 'AI Khidmat', body: 'Tanya tentang tukar masa, giliran, status cawangan, dan perkembangan aduan.' },
+    n1: { title: 'Pesanan diterima', body: 'Nasi Lemak Station telah menerima pesanan ambil sendiri anda.' },
+    n2: { title: 'Kemas kini peniaga', body: 'SparkWash Kepong mempunyai 3 kereta dalam giliran, anggaran 12 minit.' },
+    n3: { title: 'Khidmat WhatsApp', body: 'Pengesahan bayaran dan peringatan pesanan boleh dihantar melalui WhatsApp.' },
   },
 };
 
 type I18nStore = {
-  lang: Language;
-  setLang: (lang: Language) => void;
-  t: (key: string, vars?: Record<string, string | number>) => string;
-  serviceName: (id: ServiceId) => string;
-  serviceDesc: (id: ServiceId) => string;
-  outletName: (id: string, fallback?: string) => string;
-  orderService: (order: Pick<Order, 'grad' | 'service'>) => string;
-  promoTitle: (promo: Pick<Promo, 'id' | 'title'>) => string;
-  promoSub: (promo: Pick<Promo, 'id' | 'sub'>) => string;
-  promoDetail: (promo: Promo) => {
-    title: string;
-    sub: string;
-    fullTitle: string;
-    tag: string;
-    unit: string;
-    ctaText: string;
-    bullets: string[];
-    terms: string[];
-  };
-  vehicleSpec: (id: string) => string;
-  addOn: (id: string) => { name: string; desc: string };
-  includedItems: () => string[];
-  dateLabel: (label: string, week: string) => string;
-  notification: (id: string, fallback: NotificationCopy) => NotificationCopy;
+  lang: Language; setLang: (lang: Language) => void; t: (key: string, vars?: Record<string, string | number>) => string;
+  serviceName: (id: ServiceId) => string; serviceDesc: (id: ServiceId) => string; outletName: (id: string, fallback?: string) => string;
+  orderService: (order: Pick<Order, 'service' | 'lines'>) => string; promoTitle: (promo: Pick<Promo, 'title'>) => string; promoSub: (promo: Pick<Promo, 'sub'>) => string;
+  promoDetail: (promo: Promo) => { title: string; sub: string; fullTitle: string; tag: string; unit: string; ctaText: string; bullets: string[]; terms: string[] };
+  notification: (_id: string, fallback: NotificationCopy) => NotificationCopy; dateLabel: (label: string, week: string) => string;
+  categoryName: (category: Category) => string; categorySubtitle: (category: Category) => string; merchantHero: (merchant: Merchant) => string; catalogItemName: (item: CatalogItem | OrderLine) => string; catalogItemDesc: (item: CatalogItem) => string; orderLineName: (line: OrderLine) => string; statusText: (status: MarketplaceStatus) => string; fulfilmentText: (mode: FulfilmentMode) => string;
+  vehicleSpec: (id: string) => string; addOn: (id: string) => { name: string; desc: string }; includedItems: () => string[];
 };
 
 const Ctx = createContext<I18nStore | null>(null);
 
-function interpolate(text: string, vars?: Record<string, string | number>) {
-  if (!vars) return text;
-  return Object.entries(vars).reduce((acc, [key, value]) => acc.replaceAll(`{${key}}`, String(value)), text);
+function format(template: string, vars?: Record<string, string | number>) {
+  if (!vars) return template;
+  return Object.entries(vars).reduce((out, [key, value]) => out.replaceAll(`{${key}}`, String(value)), template);
 }
 
-function dateKey(label: string, week: string) {
-  if (label === '今天') return 'today';
-  if (label === '明天') return 'tomorrow';
-  if (label === '后天') return 'afterTomorrow';
-  const byWeek: Record<string, string> = { 周三: 'wed', 周四: 'thu', 周五: 'fri', 周六: 'sat', 周日: 'sun', 周一: 'mon' };
-  return byWeek[week] ?? week;
-}
-
-export function I18nProvider({ children }: { children: ReactNode }) {
-  const [lang, setLang] = useState<Language>('zh');
-  const store = useMemo<I18nStore>(
-    () => ({
-      lang,
-      setLang,
-      t: (key, vars) => interpolate(labels[lang][key] ?? labels.zh[key] ?? key, vars),
-      serviceName: (id) => servicesByLang[lang][id]?.name ?? servicesByLang.zh[id].name,
-      serviceDesc: (id) => servicesByLang[lang][id]?.desc ?? servicesByLang.zh[id].desc,
-      outletName: (id, fallback) => outletNames[lang][id] ?? fallback ?? id,
-      orderService: (order) => orderServices[lang][order.grad] ?? order.service,
-      promoTitle: (promo) => promoCopy[lang][promo.id]?.title ?? promo.title,
-      promoSub: (promo) => promoCopy[lang][promo.id]?.sub ?? promo.sub,
-      promoDetail: (promo) => {
-        const copy = promoCopy[lang][promo.id];
-        return {
-          title: copy?.title ?? promo.title,
-          sub: copy?.sub ?? promo.sub,
-          fullTitle: copy?.fullTitle ?? promo.fullTitle,
-          tag: copy?.tag ?? promo.tag,
-          unit: copy?.unit ?? promo.unit,
-          ctaText: copy?.cta ?? promo.ctaText,
-          bullets: copy?.bullets ?? promo.bullets,
-          terms: copy?.terms ?? promo.terms,
-        };
+export function LanguageProvider({ children }: { children: ReactNode }) {
+  const [lang, setLang] = useState<Language>('en');
+  const store = useMemo<I18nStore>(() => {
+    const dict = labels[lang];
+    return {
+      lang, setLang,
+      t: (key, vars) => format(dict[key] ?? en[key] ?? key, vars),
+      serviceName: (id) => serviceCopy[lang][id]?.name ?? serviceCopy.en[id]?.name ?? id,
+      serviceDesc: (id) => serviceCopy[lang][id]?.desc ?? serviceCopy.en[id]?.desc ?? id,
+      outletName: (_id, fallback) => fallback ?? _id,
+      orderService: (order) => order.lines?.[0]?.name ?? order.service,
+      promoTitle: (promo) => promo.title,
+      promoSub: (promo) => promo.sub,
+promoDetail: (promo) => {
+        const copy = promoCopy[lang][promo.id] ?? {};
+        return { title: copy.title ?? promo.title, sub: copy.sub ?? promo.sub, fullTitle: copy.fullTitle ?? promo.fullTitle, tag: copy.tag ?? promo.tag, unit: copy.unit ?? promo.unit, ctaText: copy.ctaText ?? promo.ctaText, bullets: copy.bullets ?? promo.bullets, terms: copy.terms ?? promo.terms };
       },
-      vehicleSpec: (id) => vehicleSpecs[lang][id]?.name ?? vehicleSpecs.zh[id]?.name ?? id,
-      addOn: (id) => addOns[lang][id] ?? addOns.zh[id],
-      includedItems: () => includedItems[lang],
-      dateLabel: (label, week) => dateLabels[lang][dateKey(label, week)] ?? week,
       notification: (id, fallback) => notificationCopy[lang][id] ?? fallback,
-    }),
-    [lang],
-  );
-
+      dateLabel: (label, week) => label || week,
+      categoryName: (category) => categoryCopy[lang][category.id]?.name ?? category.name,
+      categorySubtitle: (category) => categoryCopy[lang][category.id]?.subtitle ?? category.subtitle,
+      merchantHero: (merchant) => merchantHeroCopy[lang][merchant.id] ?? merchant.hero,
+      catalogItemName: (item) => {
+        const id = 'itemId' in item ? item.itemId : item.id;
+        return catalogCopy[lang][id]?.name ?? item.name;
+      },
+      catalogItemDesc: (item) => catalogCopy[lang][item.id]?.desc ?? item.desc,
+      orderLineName: (line) => catalogCopy[lang][line.itemId]?.name ?? line.name,
+      statusText: (status) => statusCopy[lang][status] ?? statusCopy.en[status],
+      fulfilmentText: (mode) => fulfilmentCopy[lang][mode] ?? fulfilmentCopy.en[mode],
+      vehicleSpec: (id) => vehicleSpecs[lang][id] ?? vehicleSpecs.en[id] ?? id,
+      addOn: (id) => addOns[lang][id] ?? addOns.en[id] ?? { name: id, desc: '' },
+      includedItems: () => included[lang] ?? included.en,
+    };
+  }, [lang]);
   return <Ctx.Provider value={store}>{children}</Ctx.Provider>;
 }
 
+export const I18nProvider = LanguageProvider;
+
 export function useI18n() {
   const ctx = useContext(Ctx);
-  if (!ctx) throw new Error('useI18n must be used within I18nProvider');
+  if (!ctx) throw new Error('useI18n must be used within LanguageProvider');
   return ctx;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

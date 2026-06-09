@@ -5,13 +5,14 @@ import { ReactNode } from 'react';
 import { Pressable, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { BrandIcon } from '@/components/brand-icons';
 import { AppBrand, Brand, Gradients, Radius, Shadow } from '@/constants/brand';
 
 type IconName = keyof typeof Ionicons.glyphMap;
 
 export function BackHeader({ title, sub }: { title: string; sub?: string }) {
   return (
-    <LinearGradient colors={Gradients.hero} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={hdr.grad}>
+    <LinearGradient colors={Gradients.heroWarm} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={hdr.grad}>
       <SafeAreaView edges={['top']}>
         <View style={hdr.row}>
           <Pressable
@@ -34,6 +35,10 @@ export function Card({ children, style }: { children: ReactNode; style?: StylePr
   return <View style={[styles.card, style]}>{children}</View>;
 }
 
+export function Surface({ children, style }: { children: ReactNode; style?: StyleProp<ViewStyle> }) {
+  return <View style={[styles.surface, style]}>{children}</View>;
+}
+
 export function GradIcon({
   icon,
   grad,
@@ -45,15 +50,7 @@ export function GradIcon({
   size?: number;
   iconSize?: number;
 }) {
-  return (
-    <LinearGradient
-      colors={Gradients[grad]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={{ width: size, height: size, borderRadius: Math.max(8, size * 0.24), alignItems: 'center', justifyContent: 'center' }}>
-      <Ionicons name={icon} size={iconSize} color="#fff" />
-    </LinearGradient>
-  );
+  return <BrandIcon icon={icon} size={size} />;
 }
 
 export function SectionTitle({ title, action, onAction }: { title: string; action?: string; onAction?: () => void }) {
@@ -61,9 +58,10 @@ export function SectionTitle({ title, action, onAction }: { title: string; actio
     <View style={styles.sectionRow}>
       <Text style={styles.sectionTitle}>{title}</Text>
       {action ? (
-        <Text style={styles.sectionAction} onPress={onAction}>
-          {action}
-        </Text>
+        <Pressable onPress={onAction} hitSlop={8} style={styles.sectionActionPill}>
+          <Text style={styles.sectionAction}>{action}</Text>
+          <Ionicons name="chevron-forward" size={13} color={Brand.primary} />
+        </Pressable>
       ) : null}
     </View>
   );
@@ -80,16 +78,16 @@ export function Badge({
 }) {
   return (
     <View style={[styles.badge, { backgroundColor: soft }]}>
-      <Text style={[styles.badgeText, { color }]}>{text}</Text>
+      <Text style={[styles.badgeText, { color }]} numberOfLines={1}>{text}</Text>
     </View>
   );
 }
 
 export function Stars({ rating, size = 12 }: { rating: number; size?: number }) {
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
       <Ionicons name="star" size={size} color={Brand.star} />
-      <Text style={{ color: Brand.text, fontSize: size, fontWeight: '700' }}>{rating.toFixed(1)}</Text>
+      <Text style={{ color: Brand.text, fontSize: size, fontWeight: '800' }}>{rating.toFixed(1)}</Text>
     </View>
   );
 }
@@ -103,22 +101,32 @@ const styles = StyleSheet.create({
     padding: 16,
     ...Shadow.card,
   },
+  surface: {
+    backgroundColor: Brand.cardElevated,
+    borderRadius: Radius.xl,
+    borderWidth: 1,
+    borderColor: Brand.border,
+    padding: 18,
+    ...Shadow.soft,
+  },
   sectionRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 12,
   },
-  sectionTitle: { fontSize: 16, fontWeight: '800', color: Brand.text },
-  sectionAction: { fontSize: 12, color: Brand.primary, fontWeight: '800' },
-  badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: Radius.pill, alignSelf: 'flex-start' },
-  badgeText: { fontSize: 11, fontWeight: '800' },
+  sectionTitle: { fontSize: 17, fontWeight: '900', color: Brand.text, letterSpacing: 0 },
+  sectionActionPill: { flexDirection: 'row', alignItems: 'center', gap: 2, paddingHorizontal: 10, paddingVertical: 6, borderRadius: Radius.pill, backgroundColor: Brand.primarySoft },
+  sectionAction: { fontSize: 12, color: Brand.primary, fontWeight: '900' },
+  badge: { maxWidth: 130, paddingHorizontal: 10, paddingVertical: 5, borderRadius: Radius.pill, alignSelf: 'flex-start' },
+  badgeText: { fontSize: 11, fontWeight: '900' },
 });
 
 const hdr = StyleSheet.create({
-  grad: { borderBottomLeftRadius: 18, borderBottomRightRadius: 18 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 14, paddingTop: 6, paddingBottom: 16 },
-  back: { width: 38, height: 38, borderRadius: 19, backgroundColor: 'rgba(255,255,255,0.12)', alignItems: 'center', justifyContent: 'center' },
-  title: { fontSize: 18, fontWeight: '900', color: '#fff' },
-  sub: { fontSize: 12, color: Brand.textOnDarkSub, marginTop: 2 },
+  grad: { borderBottomLeftRadius: 24, borderBottomRightRadius: 24, ...Shadow.strong },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingTop: 8, paddingBottom: 18 },
+  back: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.14)', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: Brand.borderDark },
+  title: { fontSize: 20, fontWeight: '900', color: '#fff' },
+  sub: { fontSize: 12, color: Brand.textOnDarkSub, marginTop: 3, lineHeight: 17 },
 });
+

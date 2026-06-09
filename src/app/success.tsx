@@ -30,25 +30,25 @@ export default function Success() {
         </Animated.View>
 
         <Animated.View style={{ opacity: fade, alignItems: 'center' }}>
-          <Text style={styles.title}>{t('successTitle')}</Text>
-          <Text style={styles.sub}>{t('successSub', { id: id ?? '' })}</Text>
+          <Text style={styles.title}>{t('orderPlaced')}</Text>
+          <Text style={styles.sub}>{t('orderSentMerchant', { id: id ?? '' })}</Text>
           <Text style={styles.amount}>RM {price}</Text>
 
           <View style={styles.tipCard}>
             <Ionicons name="logo-whatsapp" size={20} color="#25D366" />
-            <Text style={styles.tipText}>{t('successTip')}</Text>
+            <Text style={styles.tipText}>{t('successTipMarketplace')}</Text>
           </View>
         </Animated.View>
       </View>
 
       <Animated.View style={[styles.footer, { opacity: fade }]}>
         <Pressable style={styles.btnGhost} onPress={() => router.replace('/(tabs)/orders')}>
-          <Text style={styles.btnGhostText}>{t('viewAllOrders')}</Text>
+          <Text style={styles.btnGhostText}>{t('allOrders')}</Text>
         </Pressable>
-        <Pressable onPress={() => router.replace({ pathname: '/order/[id]', params: { id: String(id) } })}>
+        <Pressable onPress={() => router.replace('/(tabs)/staff')}>
           <LinearGradient colors={Gradients.brand} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.btnPrimary}>
-            <Ionicons name="qr-code-outline" size={18} color="#fff" />
-            <Text style={styles.btnPrimaryText}>{t('viewQr')}</Text>
+            <Ionicons name="storefront-outline" size={18} color="#fff" />
+            <Text style={styles.btnPrimaryText}>{t('merchantView')}</Text>
           </LinearGradient>
         </Pressable>
       </Animated.View>
@@ -61,18 +61,9 @@ const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32 },
   circle: { width: 130, height: 130, borderRadius: 65, alignItems: 'center', justifyContent: 'center', ...Shadow.soft },
   title: { color: '#fff', fontSize: 26, fontWeight: '900', marginTop: 30 },
-  sub: { color: Brand.textOnDarkSub, fontSize: 14, marginTop: 8 },
+  sub: { color: Brand.textOnDarkSub, fontSize: 14, marginTop: 8, textAlign: 'center' },
   amount: { color: Brand.primary, fontSize: 32, fontWeight: '900', marginTop: 14 },
-  tipCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: Radius.md,
-    marginTop: 28,
-  },
+  tipCard: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: 'rgba(255,255,255,0.1)', paddingHorizontal: 16, paddingVertical: 12, borderRadius: Radius.md, marginTop: 28 },
   tipText: { color: '#fff', fontSize: 12, flex: 1 },
   footer: { flexDirection: 'row', gap: 12, paddingHorizontal: 24, paddingBottom: 40 },
   btnGhost: { flex: 1, paddingVertical: 15, borderRadius: Radius.pill, alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.12)' },
@@ -80,3 +71,4 @@ const styles = StyleSheet.create({
   btnPrimary: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 24, paddingVertical: 15, borderRadius: Radius.pill },
   btnPrimaryText: { color: '#fff', fontSize: 14, fontWeight: '800' },
 });
+

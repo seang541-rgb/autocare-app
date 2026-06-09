@@ -1,0 +1,67 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LokalGo Logo & Icon Direction</title>
+  <style>
+    :root{--ink:#0b1220;--muted:#667085;--line:#e7ebf2;--bg:#f4f6fa;--card:#fff;--orange:#f97316;--orange2:#ea580c;--green:#10b981;--blue:#2563eb;--shadow:0 24px 60px rgba(16,24,40,.12)}
+    *{box-sizing:border-box} body{margin:0;background:var(--bg);font-family:Inter,Segoe UI,Arial,sans-serif;color:var(--ink)}
+    .page{max-width:1180px;margin:0 auto;padding:34px 22px 60px}.hero{display:grid;grid-template-columns:1fr 380px;gap:24px;align-items:stretch}.panel{background:var(--card);border:1px solid var(--line);border-radius:28px;box-shadow:var(--shadow)}
+    .intro{padding:34px}.eyebrow{color:var(--orange);font-weight:900;font-size:13px;letter-spacing:.04em;text-transform:uppercase}.intro h1{font-size:44px;line-height:1.02;margin:12px 0 12px;letter-spacing:-.02em}.intro p{font-size:16px;line-height:1.65;color:var(--muted);max-width:640px}.chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}.chip{padding:10px 13px;border-radius:999px;background:#fff3e8;color:#c2410c;font-weight:900;font-size:12px}
+    .phone{padding:16px;background:#111827;border-radius:34px;box-shadow:var(--shadow)}.screen{height:680px;border-radius:26px;background:#f7f8fb;overflow:hidden}.screenHead{padding:22px 18px 18px;background:linear-gradient(135deg,#111827,#7c2d12);color:white}.brandRow{display:flex;align-items:center;gap:12px}.brandText{font-size:24px;font-weight:950}.sub{color:rgba(255,255,255,.72);font-size:12px;font-weight:700;margin-top:3px}.wallet{margin-top:18px;border-radius:22px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.15);padding:16px}.wallet small{color:rgba(255,255,255,.72);font-weight:800}.wallet b{display:block;font-size:30px;margin-top:4px}.appGrid{padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:12px}.appTile{height:128px;background:white;border:1px solid var(--line);border-radius:24px;padding:14px;box-shadow:0 8px 24px rgba(16,24,40,.06)}.appTile h4{margin:12px 0 4px;font-size:15px}.appTile p{margin:0;color:var(--muted);font-size:11px;font-weight:700}
+    .logoMark{width:54px;height:54px;border-radius:18px;background:linear-gradient(135deg,var(--orange),var(--orange2));display:grid;place-items:center;position:relative;box-shadow:0 16px 30px rgba(249,115,22,.28)}.logoMark svg{width:34px;height:34px}.logoMark.white{background:white}.logoMark.dark{background:#111827}.logoMark.green{background:linear-gradient(135deg,#34d399,#059669)}
+    .section{margin-top:28px}.section h2{font-size:26px;margin:0 0 12px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.card{padding:22px}.card h3{font-size:19px;margin:16px 0 7px}.card p{color:var(--muted);font-size:14px;line-height:1.55;margin:0}.badge{display:inline-block;margin-top:14px;padding:8px 10px;border-radius:999px;font-size:11px;font-weight:950}.recommended{background:#ecfdf3;color:#027a48}.safe{background:#eef4ff;color:#175cd3}.bold{background:#fff3e8;color:#c2410c}
+    .iconGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px}.iconCell{height:112px;border:1px solid var(--line);border-radius:22px;background:white;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}.iconCell span{font-size:12px;font-weight:900;color:#344054}.brandIcon{width:48px;height:48px;border-radius:18px;display:grid;place-items:center;border:1.5px solid rgba(16,24,40,.08);background:#fff}.brandIcon svg{width:29px;height:29px;stroke:var(--ink);stroke-width:2.15;fill:none;stroke-linecap:round;stroke-linejoin:round}.brandIcon.orange svg{stroke:var(--orange)}.brandIcon.green svg{stroke:var(--green)}.brandIcon.blue svg{stroke:var(--blue)}
+    .comparison{display:grid;grid-template-columns:1fr 1fr;gap:16px}.bad,.good{padding:22px;border-radius:26px}.bad{background:#fff;border:1px solid #fee4e2}.good{background:#fff;border:1px solid #d1fadf}.bad h3,.good h3{margin:0 0 14px}.miniRow{display:flex;gap:10px;flex-wrap:wrap}.cheap{width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,#22c55e,#3b82f6);display:grid;place-items:center;color:#fff;font-weight:900}.rule{display:flex;gap:12px;align-items:flex-start;margin-top:12px;color:var(--muted);font-size:14px;line-height:1.45}.num{width:24px;height:24px;border-radius:50%;background:#111827;color:#fff;display:grid;place-items:center;font-size:12px;font-weight:900;flex:0 0 auto}
+    @media(max-width:900px){.hero,.cards,.comparison{grid-template-columns:1fr}.phone{max-width:420px}.intro h1{font-size:34px}.iconGrid{grid-template-columns:repeat(2,1fr)}}
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <div class="intro panel">
+        <div class="eyebrow">LokalGo visual system proposal</div>
+        <h1>Stop using random colored buttons. Build a brand icon language.</h1>
+        <p>The current icons feel cheap because every square uses a different symbol style and color mood. This proposal makes LokalGo feel like a serious Malaysia merchant platform: wallet-ready, Grab-like in clarity, but not copied.</p>
+        <div class="chips"><div class="chip">Unified stroke</div><div class="chip">Premium rounded geometry</div><div class="chip">Orange + navy brand</div><div class="chip">Merchant platform feel</div></div>
+      </div>
+      <div class="phone"><div class="screen">
+        <div class="screenHead"><div class="brandRow"><div class="logoMark"><svg viewBox="0 0 32 32"><path d="M7 14c0-4.4 3.6-8 9-8s9 3.6 9 8c0 6-9 13-9 13S7 20 7 14Z" fill="none" stroke="white" stroke-width="2.2"/><path d="M11 14h10M12 18h8M13 10h6" stroke="white" stroke-width="2.2" stroke-linecap="round"/></svg></div><div><div class="brandText">LokalGo</div><div class="sub">Merchant, orders and payments</div></div></div><div class="wallet"><small>Wallet balance</small><b>RM 128.80</b></div></div>
+        <div class="appGrid">
+          <div class="appTile"><div class="brandIcon orange"><svg viewBox="0 0 32 32"><path d="M8 18h16l-2-6H10l-2 6Z"/><path d="M10 18v4M22 18v4M12 22h8"/><path d="M11 12c1-3 9-3 10 0"/></svg></div><h4>Car care</h4><p>Wash, tyres, detailing</p></div>
+          <div class="appTile"><div class="brandIcon green"><svg viewBox="0 0 32 32"><path d="M9 12h14l-1 13H10L9 12Z"/><path d="M12 12c0-3 8-3 8 0"/><path d="M16 16v5"/></svg></div><h4>Food</h4><p>Restaurants and cafes</p></div>
+          <div class="appTile"><div class="brandIcon blue"><svg viewBox="0 0 32 32"><path d="M9 11h14v14H9z"/><path d="M13 11c0-5 6-5 6 0"/><path d="M13 17h6"/></svg></div><h4>Retail</h4><p>Shops and convenience</p></div>
+          <div class="appTile"><div class="brandIcon orange"><svg viewBox="0 0 32 32"><path d="M16 6l2.1 5.6L24 14l-5.9 2.4L16 22l-2.1-5.6L8 14l5.9-2.4L16 6Z"/><path d="M23 20l1 2.5 2.5 1-2.5 1-1 2.5-1-2.5-2.5-1 2.5-1 1-2.5Z"/></svg></div><h4>Services</h4><p>Beauty, repair, errands</p></div>
+        </div>
+      </div></div>
+    </section>
+
+    <section class="section cards">
+      <div class="card panel"><div class="logoMark"><svg viewBox="0 0 32 32"><path d="M7 14c0-4.4 3.6-8 9-8s9 3.6 9 8c0 6-9 13-9 13S7 20 7 14Z" fill="none" stroke="white" stroke-width="2.2"/><path d="M11 14h10M12 18h8M13 10h6" stroke="white" stroke-width="2.2" stroke-linecap="round"/></svg></div><h3>A. Merchant Pin</h3><p>Location pin + storefront lines. Best for a local merchant app because it says nearby, shop, service, and platform in one mark.</p><span class="badge recommended">Recommended</span></div>
+      <div class="card panel"><div class="logoMark green"><svg viewBox="0 0 32 32"><path d="M8 10h16v14H8z" fill="none" stroke="white" stroke-width="2.2"/><path d="M11 10c0-5 10-5 10 0M12 16h8M12 20h6" stroke="white" stroke-width="2.2" stroke-linecap="round"/></svg></div><h3>B. Wallet Shop</h3><p>More TNG-like. Strong payment/merchant dashboard signal, but it may feel slightly more finance-heavy than lifestyle marketplace.</p><span class="badge safe">Safe and corporate</span></div>
+      <div class="card panel"><div class="logoMark dark"><svg viewBox="0 0 32 32"><path d="M7 20 16 7l9 13" fill="none" stroke="white" stroke-width="2.2"/><path d="M10 20h12v5H10zM13 20v-5h6v5" stroke="white" stroke-width="2.2"/></svg></div><h3>C. Lokal Roof</h3><p>More ownable as a brand mark. Feels premium and local, but less instantly clear as a marketplace compared with A.</p><span class="badge bold">Most distinctive</span></div>
+    </section>
+
+    <section class="section panel card">
+      <h2>Recommended icon set</h2>
+      <p>Use one line family, mostly white cards, small accent color only. This removes the cheap “random app icon” feeling.</p>
+      <div class="iconGrid">
+        <div class="iconCell"><div class="brandIcon orange"><svg viewBox="0 0 32 32"><path d="M8 18h16l-2-6H10l-2 6Z"/><path d="M10 18v4M22 18v4M12 22h8"/><path d="M11 12c1-3 9-3 10 0"/></svg></div><span>Car care</span></div>
+        <div class="iconCell"><div class="brandIcon green"><svg viewBox="0 0 32 32"><path d="M10 8v16M22 8v16M10 16h12"/><path d="M15 8v16"/></svg></div><span>Food</span></div>
+        <div class="iconCell"><div class="brandIcon blue"><svg viewBox="0 0 32 32"><path d="M9 11h14v14H9z"/><path d="M13 11c0-5 6-5 6 0"/><path d="M13 17h6"/></svg></div><span>Retail</span></div>
+        <div class="iconCell"><div class="brandIcon orange"><svg viewBox="0 0 32 32"><path d="M16 6l2.1 5.6L24 14l-5.9 2.4L16 22l-2.1-5.6L8 14l5.9-2.4L16 6Z"/></svg></div><span>Services</span></div>
+        <div class="iconCell"><div class="brandIcon green"><svg viewBox="0 0 32 32"><path d="M8 10h16v12H8z"/><path d="M11 14h10M11 18h7"/><path d="M23 23l3 3"/></svg></div><span>AI Care</span></div>
+        <div class="iconCell"><div class="brandIcon blue"><svg viewBox="0 0 32 32"><path d="M10 8h12v16H10z"/><path d="M13 12h2M18 12h2M13 17h2M18 17h2M13 22h7"/></svg></div><span>Orders</span></div>
+        <div class="iconCell"><div class="brandIcon orange"><svg viewBox="0 0 32 32"><path d="M8 8h6v6H8zM18 8h6v6h-6zM8 18h6v6H8z"/><path d="M19 19h5v5h-5z"/></svg></div><span>QR</span></div>
+        <div class="iconCell"><div class="brandIcon blue"><svg viewBox="0 0 32 32"><path d="M8 22h16M10 22V10h12v12"/><path d="M13 14h6M13 18h6"/></svg></div><span>Merchant</span></div>
+      </div>
+    </section>
+
+    <section class="section comparison">
+      <div class="bad"><h3>Current issue</h3><div class="miniRow"><div class="cheap">🏪</div><div class="cheap">📍</div><div class="cheap">💳</div><div class="cheap">🎟</div><div class="cheap">🚗</div></div><div class="rule"><div class="num">1</div><div>Too many unrelated pictograms and color gradients. It reads like prototype assets.</div></div></div>
+      <div class="good"><h3>Better rule</h3><div class="miniRow"><div class="brandIcon orange"><svg viewBox="0 0 32 32"><path d="M8 22h16M10 22V10h12v12"/><path d="M13 14h6"/></svg></div><div class="brandIcon green"><svg viewBox="0 0 32 32"><path d="M8 10h16v12H8z"/><path d="M11 14h10"/></svg></div><div class="brandIcon blue"><svg viewBox="0 0 32 32"><path d="M9 11h14v14H9z"/><path d="M13 17h6"/></svg></div></div><div class="rule"><div class="num">2</div><div>One icon grammar: same stroke, same radius, restrained colors. This feels like a real product system.</div></div></div>
+    </section>
+  </main>
+</body>
+</html>
