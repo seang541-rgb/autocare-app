@@ -7,27 +7,25 @@ import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-n
 import { BackHeader, Card } from '@/components/ui';
 import { Brand, Gradients, Radius, Shadow } from '@/constants/brand';
 import { services } from '@/constants/data';
+import { useI18n } from '@/store/i18n';
 
-// 洗车规格（按车型）
 const specs = [
-  { id: 'sedan', name: '小型车 / 轿车', icon: 'car-outline' as const, price: 12 },
-  { id: 'suv', name: 'SUV / MPV', icon: 'car-sport-outline' as const, price: 18 },
-  { id: 'big', name: '大型车 / 商用', icon: 'bus-outline' as const, price: 25 },
+  { id: 'sedan', icon: 'car-outline' as const, price: 12 },
+  { id: 'suv', icon: 'car-sport-outline' as const, price: 18 },
+  { id: 'big', icon: 'bus-outline' as const, price: 25 },
 ];
 
-// 加购项
 const addons = [
-  { id: 'vacuum', name: '内部吸尘', desc: '座椅+地毯深度吸尘', price: 0, free: true },
-  { id: 'wax', name: '快速打蜡', desc: '车漆增亮保护', price: 15 },
-  { id: 'tyre', name: '轮胎上光', desc: '轮胎黑亮如新', price: 8 },
-  { id: 'fragrance', name: '车内香氛', desc: '7 天清新留香', price: 10 },
+  { id: 'vacuum', price: 0, free: true },
+  { id: 'wax', price: 15 },
+  { id: 'tyre', price: 8 },
+  { id: 'fragrance', price: 10 },
 ];
-
-const included = ['高压预冲洗', '泡沫清洁', '轮毂清洗', '清水冲洗', '风干', '免费吸尘'];
 
 export default function ServiceDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const service = services.find((s) => s.id === id) ?? services[0];
+  const { t, serviceName, serviceDesc, vehicleSpec, addOn, includedItems } = useI18n();
 
   const [specId, setSpecId] = useState('sedan');
   const [picked, setPicked] = useState<string[]>(['vacuum']);
@@ -43,14 +41,14 @@ export default function ServiceDetail() {
   }
 
   function next() {
-    const addNames = addons.filter((a) => picked.includes(a.id)).map((a) => a.name);
+    const addNames = addons.filter((a) => picked.includes(a.id)).map((a) => addOn(a.id).name);
     router.push({
       pathname: '/confirm',
       params: {
-        service: `${service.name}（${spec.name}）`,
+        service: `${serviceName(service.id)} (${vehicleSpec(spec.id)})`,
         icon: service.icon,
         grad: service.grad,
-        addons: addNames.join('、') || '无',
+        addons: addNames.join(', ') || t('none'),
         price: String(total),
       },
     });
@@ -58,23 +56,21 @@ export default function ServiceDetail() {
 
   return (
     <View style={styles.root}>
-      <BackHeader title={service.name} sub={service.brand} />
+      <BackHeader title={serviceName(service.id)} sub={service.brand} />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
-        {/* 服务大图卡 */}
         <LinearGradient colors={Gradients[service.grad]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
           <Ionicons name={service.icon} size={44} color="#fff" />
           <View style={{ flex: 1 }}>
-            <Text style={styles.heroTitle}>{service.name}</Text>
-            <Text style={styles.heroDesc}>{service.desc}</Text>
+            <Text style={styles.heroTitle}>{serviceName(service.id)}</Text>
+            <Text style={styles.heroDesc}>{serviceDesc(service.id)}</Text>
           </View>
         </LinearGradient>
 
-        {/* 包含项 */}
-        <Text style={styles.section}>套餐包含</Text>
+        <Text style={styles.section}>{t('packageIncluded')}</Text>
         <Card>
           <View style={styles.incWrap}>
-            {included.map((it) => (
+            {includedItems().map((it) => (
               <View key={it} style={styles.incItem}>
                 <Ionicons name="checkmark-circle" size={16} color={Brand.success} />
                 <Text style={styles.incText}>{it}</Text>
@@ -83,8 +79,7 @@ export default function ServiceDetail() {
           </View>
         </Card>
 
-        {/* 选车型 */}
-        <Text style={styles.section}>选择车型</Text>
+        <Text style={styles.section}>{t('chooseVehicle')}</Text>
         <View style={{ gap: 10 }}>
           {specs.map((s) => {
             const on = s.id === specId;
@@ -92,7 +87,7 @@ export default function ServiceDetail() {
               <Pressable key={s.id} onPress={() => setSpecId(s.id)}>
                 <Card style={[styles.specRow, on && { borderWidth: 2, borderColor: Brand.primary }]}>
                   <Ionicons name={s.icon} size={24} color={on ? Brand.primary : Brand.textSub} />
-                  <Text style={[styles.specName, on && { color: Brand.primary }]}>{s.name}</Text>
+                  <Text style={[styles.specName, on && { color: Brand.primary }]}>{vehicleSpec(s.id)}</Text>
                   <Text style={styles.specPrice}>RM{s.price}</Text>
                   <View style={[styles.radio, on && styles.radioOn]}>
                     {on && <Ionicons name="checkmark" size={12} color="#fff" />}
@@ -103,20 +98,20 @@ export default function ServiceDetail() {
           })}
         </View>
 
-        {/* 加购 */}
-        <Text style={styles.section}>增值加购</Text>
+        <Text style={styles.section}>{t('addOns')}</Text>
         <View style={{ gap: 10 }}>
           {addons.map((a) => {
             const on = picked.includes(a.id);
+            const copy = addOn(a.id);
             return (
               <Pressable key={a.id} onPress={() => toggle(a.id)}>
                 <Card style={[styles.addRow, on && { borderWidth: 2, borderColor: Brand.primary }]}>
                   <View style={{ flex: 1 }}>
-                    <Text style={styles.addName}>{a.name}</Text>
-                    <Text style={styles.addDesc}>{a.desc}</Text>
+                    <Text style={styles.addName}>{copy.name}</Text>
+                    <Text style={styles.addDesc}>{copy.desc}</Text>
                   </View>
                   <Text style={[styles.addPrice, a.free && { color: Brand.success }]}>
-                    {a.free ? '免费' : `+RM${a.price}`}
+                    {a.free ? t('free') : `+RM${a.price}`}
                   </Text>
                   <View style={[styles.check, on && styles.checkOn]}>
                     {on && <Ionicons name="checkmark" size={13} color="#fff" />}
@@ -130,15 +125,14 @@ export default function ServiceDetail() {
         <View style={{ height: 20 }} />
       </ScrollView>
 
-      {/* 底部金额 + 下一步 */}
       <View style={styles.footer}>
         <View>
-          <Text style={styles.footLabel}>合计</Text>
+          <Text style={styles.footLabel}>{t('total')}</Text>
           <Text style={styles.footPrice}>RM {total}</Text>
         </View>
         <Pressable onPress={next}>
           <LinearGradient colors={Gradients.brand} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.cta}>
-            <Text style={styles.ctaText}>选择门店时段</Text>
+            <Text style={styles.ctaText}>{t('chooseOutletSlot')}</Text>
             <Ionicons name="arrow-forward" size={18} color="#fff" />
           </LinearGradient>
         </Pressable>

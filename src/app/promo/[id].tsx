@@ -7,33 +7,35 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Card } from '@/components/ui';
 import { Brand, Gradients, Radius, Shadow } from '@/constants/brand';
 import { promos } from '@/constants/data';
+import { useI18n } from '@/store/i18n';
 import { useToast } from '@/store/toast';
 
 export default function PromoDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const promo = promos.find((p) => p.id === id) ?? promos[0];
+  const { t, promoDetail } = useI18n();
   const toast = useToast();
+  const copy = promoDetail(promo);
 
   function buy() {
     if (promo.bookServiceId) {
       router.push({
         pathname: '/confirm',
         params: {
-          service: promo.fullTitle,
+          service: copy.fullTitle,
           icon: promo.icon,
           grad: 'wash',
-          addons: '促销活动',
+          addons: t('promoCampaign'),
           price: String(promo.bookPrice ?? promo.price),
         },
       });
     } else {
-      toast('报价功能开发中，敬请期待');
+      toast(t('quoteComingToast'));
     }
   }
 
   return (
     <View style={styles.root}>
-      {/* 渐变大头图 */}
       <LinearGradient colors={Gradients[promo.grad]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
         <SafeAreaView edges={['top']}>
           <View style={styles.heroTop}>
@@ -43,40 +45,38 @@ export default function PromoDetail() {
           </View>
           <View style={styles.heroBody}>
             <View style={styles.tag}>
-              <Text style={styles.tagText}>{promo.tag}</Text>
+              <Text style={styles.tagText}>{copy.tag}</Text>
             </View>
-            <Text style={styles.heroTitle}>{promo.fullTitle}</Text>
-            <Text style={styles.heroSub}>{promo.sub}</Text>
+            <Text style={styles.heroTitle}>{copy.fullTitle}</Text>
+            <Text style={styles.heroSub}>{copy.sub}</Text>
             <Ionicons name={promo.icon} size={120} color="rgba(255,255,255,0.16)" style={styles.ghost} />
           </View>
         </SafeAreaView>
       </LinearGradient>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
-        {/* 价格卡 */}
         <Card style={styles.priceCard}>
           {promo.price > 0 ? (
             <View style={styles.priceRow}>
               <Text style={styles.priceCur}>RM</Text>
               <Text style={styles.priceVal}>{promo.price}</Text>
-              <Text style={styles.priceUnit}>{promo.unit}</Text>
+              <Text style={styles.priceUnit}>{copy.unit}</Text>
               {promo.originalPrice ? <Text style={styles.priceOrig}>RM{promo.originalPrice}</Text> : null}
             </View>
           ) : (
-            <Text style={styles.priceFree}>免费报价</Text>
+            <Text style={styles.priceFree}>{t('freeQuote')}</Text>
           )}
           {promo.originalPrice ? (
             <View style={styles.saveBadge}>
               <Ionicons name="pricetag" size={12} color="#fff" />
-              <Text style={styles.saveText}>立省 RM{promo.originalPrice - promo.price}</Text>
+              <Text style={styles.saveText}>{t('saveAmount', { amount: promo.originalPrice - promo.price })}</Text>
             </View>
           ) : null}
         </Card>
 
-        {/* 卖点 */}
-        <Text style={styles.section}>活动权益</Text>
+        <Text style={styles.section}>{t('promoBenefits')}</Text>
         <Card>
-          {promo.bullets.map((b, i, arr) => (
+          {copy.bullets.map((b, i, arr) => (
             <View key={b} style={[styles.bulletRow, i === arr.length - 1 && { borderBottomWidth: 0 }]}>
               <Ionicons name="checkmark-circle" size={18} color={Brand.success} />
               <Text style={styles.bulletText}>{b}</Text>
@@ -84,13 +84,12 @@ export default function PromoDetail() {
           ))}
         </Card>
 
-        {/* 条款 */}
-        <Text style={styles.section}>使用须知</Text>
+        <Text style={styles.section}>{t('promoTerms')}</Text>
         <Card>
-          {promo.terms.map((t) => (
-            <View key={t} style={styles.termRow}>
+          {copy.terms.map((term) => (
+            <View key={term} style={styles.termRow}>
               <Text style={styles.termDot}>•</Text>
-              <Text style={styles.termText}>{t}</Text>
+              <Text style={styles.termText}>{term}</Text>
             </View>
           ))}
         </Card>
@@ -98,22 +97,21 @@ export default function PromoDetail() {
         <View style={{ height: 20 }} />
       </ScrollView>
 
-      {/* 底部购买 */}
       <View style={styles.footer}>
         {promo.price > 0 ? (
           <View>
-            <Text style={styles.footLabel}>优惠价</Text>
-            <Text style={styles.footPrice}>RM {promo.price}<Text style={styles.footUnit}>{promo.unit}</Text></Text>
+            <Text style={styles.footLabel}>{t('promoPrice')}</Text>
+            <Text style={styles.footPrice}>RM {promo.price}<Text style={styles.footUnit}>{copy.unit}</Text></Text>
           </View>
         ) : (
           <View>
-            <Text style={styles.footLabel}>限时活动</Text>
-            <Text style={styles.footPrice}>0 元报价</Text>
+            <Text style={styles.footLabel}>{t('limitedOffer')}</Text>
+            <Text style={styles.footPrice}>{t('zeroQuote')}</Text>
           </View>
         )}
         <Pressable onPress={buy}>
           <LinearGradient colors={Gradients.brand} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.cta}>
-            <Text style={styles.ctaText}>{promo.ctaText}</Text>
+            <Text style={styles.ctaText}>{copy.ctaText}</Text>
             <Ionicons name="arrow-forward" size={18} color="#fff" />
           </LinearGradient>
         </Pressable>

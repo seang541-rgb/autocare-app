@@ -1,15 +1,17 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { Animated, Easing, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Brand, Gradients, Radius, Shadow } from '@/constants/brand';
+import { useI18n } from '@/store/i18n';
 
 export default function Success() {
   const { id, price } = useLocalSearchParams<{ id: string; price: string }>();
-  const scale = useRef(new Animated.Value(0)).current;
-  const fade = useRef(new Animated.Value(0)).current;
+  const { t } = useI18n();
+  const [scale] = useState(() => new Animated.Value(0));
+  const [fade] = useState(() => new Animated.Value(0));
 
   useEffect(() => {
     Animated.sequence([
@@ -22,31 +24,31 @@ export default function Success() {
     <LinearGradient colors={Gradients.hero} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.root}>
       <View style={styles.center}>
         <Animated.View style={{ transform: [{ scale }] }}>
-          <LinearGradient colors={Gradients.insure} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.circle}>
+          <LinearGradient colors={Gradients.brand} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.circle}>
             <Ionicons name="checkmark-sharp" size={68} color="#fff" />
           </LinearGradient>
         </Animated.View>
 
         <Animated.View style={{ opacity: fade, alignItems: 'center' }}>
-          <Text style={styles.title}>支付成功</Text>
-          <Text style={styles.sub}>订单 {id} 已确认</Text>
+          <Text style={styles.title}>{t('orderPlaced')}</Text>
+          <Text style={styles.sub}>{t('orderSentMerchant', { id: id ?? '' })}</Text>
           <Text style={styles.amount}>RM {price}</Text>
 
           <View style={styles.tipCard}>
-            <Ionicons name="qr-code" size={20} color={Brand.primary} />
-            <Text style={styles.tipText}>到店向员工出示订单二维码即可洗车</Text>
+            <Ionicons name="logo-whatsapp" size={20} color="#25D366" />
+            <Text style={styles.tipText}>{t('successTipMarketplace')}</Text>
           </View>
         </Animated.View>
       </View>
 
       <Animated.View style={[styles.footer, { opacity: fade }]}>
         <Pressable style={styles.btnGhost} onPress={() => router.replace('/(tabs)/orders')}>
-          <Text style={styles.btnGhostText}>查看全部订单</Text>
+          <Text style={styles.btnGhostText}>{t('allOrders')}</Text>
         </Pressable>
-        <Pressable onPress={() => router.replace({ pathname: '/order/[id]', params: { id: String(id) } })}>
+        <Pressable onPress={() => router.replace('/(tabs)/staff')}>
           <LinearGradient colors={Gradients.brand} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.btnPrimary}>
-            <Ionicons name="qr-code-outline" size={18} color="#fff" />
-            <Text style={styles.btnPrimaryText}>查看二维码</Text>
+            <Ionicons name="storefront-outline" size={18} color="#fff" />
+            <Text style={styles.btnPrimaryText}>{t('merchantView')}</Text>
           </LinearGradient>
         </Pressable>
       </Animated.View>
@@ -59,12 +61,9 @@ const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32 },
   circle: { width: 130, height: 130, borderRadius: 65, alignItems: 'center', justifyContent: 'center', ...Shadow.soft },
   title: { color: '#fff', fontSize: 26, fontWeight: '900', marginTop: 30 },
-  sub: { color: Brand.textOnDarkSub, fontSize: 14, marginTop: 8 },
+  sub: { color: Brand.textOnDarkSub, fontSize: 14, marginTop: 8, textAlign: 'center' },
   amount: { color: Brand.primary, fontSize: 32, fontWeight: '900', marginTop: 14 },
-  tipCard: {
-    flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: 'rgba(255,255,255,0.1)',
-    paddingHorizontal: 16, paddingVertical: 12, borderRadius: Radius.md, marginTop: 28,
-  },
+  tipCard: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: 'rgba(255,255,255,0.1)', paddingHorizontal: 16, paddingVertical: 12, borderRadius: Radius.md, marginTop: 28 },
   tipText: { color: '#fff', fontSize: 12, flex: 1 },
   footer: { flexDirection: 'row', gap: 12, paddingHorizontal: 24, paddingBottom: 40 },
   btnGhost: { flex: 1, paddingVertical: 15, borderRadius: Radius.pill, alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.12)' },
@@ -72,3 +71,4 @@ const styles = StyleSheet.create({
   btnPrimary: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 24, paddingVertical: 15, borderRadius: Radius.pill },
   btnPrimaryText: { color: '#fff', fontSize: 14, fontWeight: '800' },
 });
+

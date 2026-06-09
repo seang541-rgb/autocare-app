@@ -1,23 +1,183 @@
-// AutoCare 模拟数据（icon = Ionicons 名称，grad = Gradients key）
-
 import type { Ionicons } from '@expo/vector-icons';
+
 type IconName = keyof typeof Ionicons.glyphMap;
 
-export type Service = {
+export type CategoryId = 'car-care' | 'food' | 'retail' | 'services';
+export type FulfilmentMode = 'booking' | 'pickup' | 'service';
+export type MarketplaceStatus = 'new' | 'accepted' | 'preparing' | 'ready' | 'completed' | 'cancelled';
+export type GradientKey = 'car' | 'food' | 'retail' | 'services' | 'merchant' | 'wash' | 'tyre' | 'detail';
+
+export type Category = {
+  id: CategoryId;
+  name: string;
+  subtitle: string;
+  icon: IconName;
+  grad: GradientKey;
+};
+
+export const categories: Category[] = [
+  { id: 'car-care', name: 'Car care', subtitle: 'Wash, tyres, detailing', icon: 'car-sport', grad: 'car' },
+  { id: 'food', name: 'Food', subtitle: 'Restaurants and cafes', icon: 'restaurant', grad: 'food' },
+  { id: 'retail', name: 'Retail', subtitle: 'Shops and convenience', icon: 'bag-handle', grad: 'retail' },
+  { id: 'services', name: 'Services', subtitle: 'Beauty, repair, errands', icon: 'sparkles', grad: 'services' },
+];
+
+export type Merchant = {
   id: string;
+  categoryId: CategoryId;
+  name: string;
+  area: string;
+  distanceKm: number;
+  rating: number;
+  reviews: number;
+  open: string;
+  openNow: boolean;
+  etaMins: number;
+  queueCount: number;
+  fulfilment: FulfilmentMode[];
+  icon: IconName;
+  grad: GradientKey;
+  hero: string;
+  image: string;
+};
+
+export const merchants: Merchant[] = [
+  { id: 'm-wash-kepong', categoryId: 'car-care', name: 'SparkWash Kepong', area: 'Kepong, Kuala Lumpur', distanceKm: 1.2, rating: 4.8, reviews: 326, open: '08:00 - 22:00', openNow: true, etaMins: 12, queueCount: 3, fulfilment: ['booking', 'service'], icon: 'car-sport', grad: 'car', hero: 'Fast lane car wash', image: 'https://images.unsplash.com/photo-1607860108855-64acf2078ed9?q=80&w=900&auto=format&fit=crop' },
+  { id: 'm-nasi-lemak', categoryId: 'food', name: 'Nasi Lemak Station', area: 'Metro Prima', distanceKm: 1.8, rating: 4.7, reviews: 512, open: '07:00 - 21:30', openNow: true, etaMins: 18, queueCount: 6, fulfilment: ['pickup'], icon: 'restaurant', grad: 'food', hero: 'Local meals ready for pickup', image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=900&auto=format&fit=crop' },
+  { id: 'm-kopi', categoryId: 'food', name: 'Kopi Corner', area: 'Desa ParkCity', distanceKm: 3.1, rating: 4.6, reviews: 228, open: '09:00 - 20:00', openNow: true, etaMins: 10, queueCount: 2, fulfilment: ['pickup'], icon: 'cafe', grad: 'food', hero: 'Coffee and pastries', image: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=900&auto=format&fit=crop' },
+  { id: 'm-mini-mart', categoryId: 'retail', name: 'QuickMart Local', area: 'Segambut', distanceKm: 2.4, rating: 4.5, reviews: 149, open: '09:00 - 23:00', openNow: true, etaMins: 15, queueCount: 1, fulfilment: ['pickup'], icon: 'bag-handle', grad: 'retail', hero: 'Daily essentials', image: 'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?q=80&w=900&auto=format&fit=crop' },
+  { id: 'm-barber', categoryId: 'services', name: 'Urban Barber', area: 'Kepong Baru', distanceKm: 2.0, rating: 4.9, reviews: 91, open: '10:00 - 20:00', openNow: false, etaMins: 0, queueCount: 0, fulfilment: ['booking', 'service'], icon: 'cut', grad: 'services', hero: 'Appointments and walk-ins', image: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?q=80&w=900&auto=format&fit=crop' },
+];
+
+export type CatalogItem = {
+  id: string;
+  merchantId: string;
+  name: string;
+  desc: string;
+  price: number;
+  icon: IconName;
+  popular?: boolean;
+};
+
+export const catalogItems: CatalogItem[] = [
+  { id: 'wash-basic', merchantId: 'm-wash-kepong', name: 'Express wash', desc: 'Exterior wash and quick dry', price: 12, icon: 'water', popular: true },
+  { id: 'wash-vacuum', merchantId: 'm-wash-kepong', name: 'Wash + vacuum', desc: 'Exterior wash with interior vacuum', price: 18, icon: 'car-sport' },
+  { id: 'detail-small', merchantId: 'm-wash-kepong', name: 'Mini detailing', desc: 'Interior wipe, wax shine, tyre dressing', price: 99, icon: 'sparkles' },
+  { id: 'nasi-classic', merchantId: 'm-nasi-lemak', name: 'Classic nasi lemak', desc: 'Rice, sambal, egg, peanuts, anchovies', price: 8, icon: 'restaurant', popular: true },
+  { id: 'ayam-rempah', merchantId: 'm-nasi-lemak', name: 'Ayam rempah set', desc: 'Spiced fried chicken with nasi lemak', price: 14, icon: 'flame' },
+  { id: 'kopi-o', merchantId: 'm-kopi', name: 'Kopi O ais', desc: 'Local iced black coffee', price: 4, icon: 'cafe' },
+  { id: 'latte', merchantId: 'm-kopi', name: 'Cafe latte', desc: 'Fresh espresso with steamed milk', price: 11, icon: 'cafe', popular: true },
+  { id: 'mart-snack', merchantId: 'm-mini-mart', name: 'Snack bundle', desc: 'Chips, drink and tissue pack', price: 16, icon: 'bag-handle' },
+  { id: 'mart-water', merchantId: 'm-mini-mart', name: 'Mineral water 6-pack', desc: 'Pickup-ready household pack', price: 9, icon: 'water' },
+  { id: 'barber-cut', merchantId: 'm-barber', name: 'Classic haircut', desc: 'Men haircut with styling', price: 35, icon: 'cut', popular: true },
+  { id: 'barber-shave', merchantId: 'm-barber', name: 'Haircut + shave', desc: 'Full grooming appointment', price: 55, icon: 'sparkles' },
+];
+
+export type OrderLine = {
+  itemId: string;
+  name: string;
+  qty: number;
+  price: number;
+};
+
+export type Order = {
+  id: string;
+  merchantId: string;
+  merchantName: string;
+  categoryId: CategoryId;
+  type: FulfilmentMode;
+  status: MarketplaceStatus;
+  lines: OrderLine[];
+  subtotal: number;
+  discount: number;
+  total: number;
+  date: string;
+  time: string;
+  note?: string;
+  qrCode?: string;
+  rating?: number;
+  review?: string;
+  complaint?: string;
+  service: string;
+  icon: IconName;
+  grad: GradientKey;
+  outletId: string;
+  outlet: string;
+  price: number;
+};
+
+export const orders: Order[] = [
+  { id: '#LG2401', merchantId: 'm-nasi-lemak', merchantName: 'Nasi Lemak Station', categoryId: 'food', type: 'pickup', status: 'preparing', lines: [{ itemId: 'nasi-classic', name: 'Classic nasi lemak', qty: 2, price: 8 }, { itemId: 'ayam-rempah', name: 'Ayam rempah set', qty: 1, price: 14 }], subtotal: 30, discount: 2, total: 28, date: '2026-06-07', time: '12:20', qrCode: 'LOKALGO|#LG2401|28', service: 'Food pickup', icon: 'restaurant', grad: 'food', outletId: 'm-nasi-lemak', outlet: 'Nasi Lemak Station', price: 28 },
+  { id: '#LG2398', merchantId: 'm-wash-kepong', merchantName: 'SparkWash Kepong', categoryId: 'car-care', type: 'booking', status: 'accepted', lines: [{ itemId: 'wash-vacuum', name: 'Wash + vacuum', qty: 1, price: 18 }], subtotal: 18, discount: 0, total: 18, date: '2026-06-07', time: '14:30', qrCode: 'LOKALGO|#LG2398|18', service: 'Car care booking', icon: 'car-sport', grad: 'car', outletId: 'm-wash-kepong', outlet: 'SparkWash Kepong', price: 18 },
+  { id: '#LG2380', merchantId: 'm-barber', merchantName: 'Urban Barber', categoryId: 'services', type: 'booking', status: 'completed', lines: [{ itemId: 'barber-cut', name: 'Classic haircut', qty: 1, price: 35 }], subtotal: 35, discount: 0, total: 35, date: '2026-06-02', time: '17:00', qrCode: 'LOKALGO|#LG2380|35', rating: 5, review: 'Clean service and on time.', service: 'Service appointment', icon: 'cut', grad: 'services', outletId: 'm-barber', outlet: 'Urban Barber', price: 35 },
+];
+
+export type Promo = {
+  id: string;
+  title: string;
+  sub: string;
+  tag: string;
+  grad: 'promo1' | 'promo2' | 'promo3';
+  icon: IconName;
+  fullTitle: string;
+  price: number;
+  originalPrice?: number;
+  unit: string;
+  ctaText: string;
+  bullets: string[];
+  terms: string[];
+  bookServiceId?: 'wash';
+  bookPrice?: number;
+};
+
+export const promos: Promo[] = [
+  { id: 'p1', title: 'RM2 off pickup', sub: 'Food and retail merchants', tag: 'Pickup', grad: 'promo1' as const, icon: 'bag-check' as IconName, fullTitle: 'Pickup Saver', price: 0, unit: '', ctaText: 'Use voucher', bullets: ['Valid for pickup orders above RM20', 'Auto applied at checkout'], terms: ['Voucher for marketplace launch preview'], bookServiceId: 'wash' as const, bookPrice: 0 },
+  { id: 'p2', title: 'Car wash deals', sub: 'Fast lane appointments', tag: 'Car care', grad: 'promo2' as const, icon: 'car-sport' as IconName, fullTitle: 'Car Care Deals', price: 12, unit: '/slot', ctaText: 'Book now', bullets: ['Selected merchants only'], terms: ['Subject to merchant availability'], bookServiceId: 'wash' as const, bookPrice: 0 },
+];
+
+export const notifications = [
+  { id: 'n1', icon: 'receipt-outline' as IconName, title: 'Order accepted', body: 'Nasi Lemak Station accepted your pickup order.' },
+  { id: 'n2', icon: 'storefront-outline' as IconName, title: 'Merchant update', body: 'SparkWash Kepong has 3 cars in queue, estimated 12 minutes.' },
+  { id: 'n3', icon: 'logo-whatsapp' as IconName, title: 'WhatsApp care', body: 'Payment confirmation and order reminders can be sent by WhatsApp.' },
+];
+
+export const profile = {
+  name: 'John Sean',
+  phone: '+60 12-345 6789',
+  level: 'LokalGo Member',
+  car: { plate: 'WXY 8888', model: 'Honda Civic 1.5 TC-P', year: '2022' },
+  packageName: 'Marketplace rewards',
+  packageLeft: 8,
+  packageTotal: 12,
+  points: 1280,
+  coupons: 3,
+};
+
+export const dates = [
+  { label: 'Today', day: '07', week: 'Sun' },
+  { label: 'Tomorrow', day: '08', week: 'Mon' },
+  { label: '', day: '09', week: 'Tue' },
+  { label: '', day: '10', week: 'Wed' },
+  { label: '', day: '11', week: 'Thu' },
+  { label: '', day: '12', week: 'Fri' },
+];
+
+export const timeSlots = ['09:00', '10:30', '12:00', '14:30', '16:00', '17:30', '19:00', '20:30'];
+
+export type Service = {
+  id: 'wash' | 'tyre' | 'detail';
   name: string;
   brand: string;
   icon: IconName;
-  grad: 'wash' | 'tyre' | 'detail' | 'insure';
+  grad: 'wash' | 'tyre' | 'detail';
   desc: string;
-  from: number; // 起价 RM
+  from: number;
 };
 
 export const services: Service[] = [
-  { id: 'wash', name: '洗车', brand: 'KeyWash', icon: 'water', grad: 'wash', desc: '自动洗车 · 免费吸尘', from: 12 },
-  { id: 'tyre', name: '轮胎保养', brand: 'KeyTyre', icon: 'disc', grad: 'tyre', desc: '换胎 · 定位 · 一般保养', from: 80 },
-  { id: 'detail', name: '镀膜美容', brand: 'KeyDetailing', icon: 'sparkles', grad: 'detail', desc: '内外清洁 · 镀膜 · 包膜', from: 199 },
-  { id: 'insure', name: '车险续保', brand: 'KeyPlus', icon: 'shield-checkmark', grad: 'insure', desc: '多家比价 · 免息分期', from: 0 },
+  { id: 'wash', name: 'Car wash', brand: 'SparkWash', icon: 'water', grad: 'wash', desc: 'Wash and vacuum', from: 12 },
+  { id: 'tyre', name: 'Tyre care', brand: 'WheelPro', icon: 'disc', grad: 'tyre', desc: 'Alignment and checks', from: 80 },
+  { id: 'detail', name: 'Detailing', brand: 'SparkDetail', icon: 'sparkles', grad: 'detail', desc: 'Interior and polish', from: 99 },
 ];
 
 export type Outlet = {
@@ -28,97 +188,30 @@ export type Outlet = {
   rating: number;
   reviews: number;
   open: string;
+  openNow: boolean;
+  queueCars: number;
+  waitMins: number;
+  lat: number;
+  lng: number;
   icon: IconName;
 };
 
-export const outlets: Outlet[] = [
-  { id: 'o1', name: 'KeyWash 甲洞旗舰店', area: 'Kepong, KL', distanceKm: 1.2, rating: 4.8, reviews: 326, open: '08:00 - 22:00', icon: 'storefront' },
-  { id: 'o2', name: 'KeyWash Segambut 分行', area: 'Segambut, KL', distanceKm: 3.5, rating: 4.6, reviews: 188, open: '08:00 - 23:00', icon: 'business' },
-  { id: 'o3', name: 'KeyTyre 轮胎中心', area: 'Kepong, KL', distanceKm: 2.1, rating: 4.7, reviews: 142, open: '09:00 - 19:00', icon: 'construct' },
-];
+export const outlets: Outlet[] = merchants.map((m, index) => ({
+  id: m.id,
+  name: m.name,
+  area: m.area,
+  distanceKm: m.distanceKm,
+  rating: m.rating,
+  reviews: m.reviews,
+  open: m.open,
+  openNow: m.openNow,
+  queueCars: m.queueCount,
+  waitMins: m.etaMins,
+  lat: 3.2141 + index * 0.01,
+  lng: 101.6387 + index * 0.01,
+  icon: m.icon,
+}));
 
-export type Promo = {
-  id: string;
-  title: string;
-  sub: string;
-  tag: string;
-  grad: 'promo1' | 'promo2' | 'promo3';
-  icon: IconName;
-  // 详情页内容
-  fullTitle: string;
-  price: number;          // 优惠价
-  originalPrice?: number; // 原价（划线）
-  unit: string;           // 价格单位，如 /月、/次
-  ctaText: string;        // 按钮文案
-  bullets: string[];      // 卖点列表
-  terms: string[];        // 使用条款
-  // 购买后走哪个下单流程（洗车）；车险类用 null = 仅展示+toast
-  bookServiceId: 'wash' | null;
-  bookPrice?: number;     // 进下单时锁定的价格
-};
 
-export const promos: Promo[] = [
-  {
-    id: 'p1', title: 'RM50 / 月\n无限洗', sub: '大车小车 一视同车', tag: '本月热卖', grad: 'promo1', icon: 'water',
-    fullTitle: '月卡 · 本月无限洗', price: 50, originalPrice: 144, unit: '/月', ctaText: '立即开通月卡',
-    bullets: ['当月不限次数自动洗车', '大车小车一个价，不加价', '每次含高压冲洗+泡沫+风干', '专属会员快速通道'],
-    terms: ['有效期：开通起 30 天', '限本人车辆使用', '到店出示会员二维码核销', '不可转让、不退款'],
-    bookServiceId: 'wash', bookPrice: 50,
-  },
-  {
-    id: 'p2', title: 'RM1\n体验洗车', sub: '半夜也能洗', tag: '新客限定', grad: 'promo2', icon: 'moon',
-    fullTitle: 'RM1 新客体验洗车', price: 1, originalPrice: 12, unit: '/次', ctaText: 'RM1 抢购',
-    bullets: ['仅限新用户首单', '24 小时门店，半夜也能洗', '标准自动洗车一次', '含免费内部吸尘'],
-    terms: ['每个新账号限购 1 次', '需在 7 天内到店使用', '到店出示订单二维码', '不与其他优惠同享'],
-    bookServiceId: 'wash', bookPrice: 1,
-  },
-  {
-    id: 'p3', title: '车险续保\n最高省 30%', sub: 'KeyPlus 多家比价', tag: '免息分期', grad: 'promo3', icon: 'shield-checkmark',
-    fullTitle: '车险续保 · 多家比价', price: 0, unit: '', ctaText: '免费获取报价',
-    bullets: ['一次填写，多家保险公司比价', '最高可省 30% 保费', '支持 0 利息分期付款', '专人协助理赔'],
-    terms: ['报价免费，无需承诺购买', '以保险公司最终核价为准', '需提供车辆与证件信息'],
-    bookServiceId: null,
-  },
-];
 
-export type Order = {
-  id: string;
-  service: string;
-  icon: IconName;
-  grad: 'wash' | 'tyre' | 'detail' | 'insure';
-  outlet: string;
-  date: string;
-  time: string;
-  price: number;
-  status: 'upcoming' | 'done' | 'cancelled';
-};
 
-export const orders: Order[] = [
-  { id: '#A2391', service: '自动洗车 + 吸尘', icon: 'water', grad: 'wash', outlet: 'KeyWash 甲洞旗舰店', date: '2026-06-03', time: '14:30', price: 18, status: 'upcoming' },
-  { id: '#A2384', service: '镀膜美容（小车）', icon: 'sparkles', grad: 'detail', outlet: 'KeyDetailing 甲洞', date: '2026-06-08', time: '10:00', price: 299, status: 'upcoming' },
-  { id: '#A2360', service: '四轮定位', icon: 'disc', grad: 'tyre', outlet: 'KeyTyre 轮胎中心', date: '2026-05-21', time: '11:00', price: 80, status: 'done' },
-  { id: '#A2351', service: '自动洗车', icon: 'water', grad: 'wash', outlet: 'KeyWash Segambut', date: '2026-05-12', time: '19:30', price: 12, status: 'done' },
-];
-
-export const dates = [
-  { label: '今天', day: '03', week: '周三' },
-  { label: '明天', day: '04', week: '周四' },
-  { label: '后天', day: '05', week: '周五' },
-  { label: '', day: '06', week: '周六' },
-  { label: '', day: '07', week: '周日' },
-  { label: '', day: '08', week: '周一' },
-];
-
-export const timeSlots = ['09:00', '10:30', '12:00', '14:30', '16:00', '17:30', '19:00', '20:30'];
-
-export const profile = {
-  name: 'John Sean',
-  phone: '+60 12-345 6789',
-  level: 'KeyAuto 金卡会员',
-  car: { plate: 'WXY 8888', model: 'Honda Civic 1.5 TC-P', year: '2022' },
-  packageName: '本月无限洗',
-  packageLeft: 8,
-  packageTotal: 12,
-  points: 1280,
-  coupons: 3,
-};

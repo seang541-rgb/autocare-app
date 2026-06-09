@@ -1,17 +1,17 @@
 {
   "expo": {
-    "name": "AutoCare",
-    "slug": "auto",
+    "name": "LokalGo",
+    "slug": "lokalgo",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "autocare",
+    "scheme": "lokalgo",
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon"
     },
     "android": {
-      "package": "com.autocare.app",
+      "package": "com.lokalgo.app",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
