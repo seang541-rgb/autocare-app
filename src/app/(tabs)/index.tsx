@@ -47,11 +47,13 @@ export default function HomeScreen() {
               </Pressable>
             </View>
 
-            <View style={styles.searchBar}>
+            <Pressable style={styles.searchBar} onPress={() => router.push('/(tabs)/booking')}>
               <Ionicons name="search" size={17} color={Brand.textMuted} />
               <Text style={styles.searchText}>{t('searchPlaceholder')}</Text>
-              <View style={styles.filterChip}><Ionicons name="options-outline" size={16} color="#fff" /></View>
-            </View>
+              <Pressable style={styles.filterChip} onPress={() => router.push('/(tabs)/booking')} hitSlop={8}>
+                <Ionicons name="options-outline" size={16} color="#fff" />
+              </Pressable>
+            </Pressable>
 
             <Text style={styles.feedTitle}>{t('homeHeroTitle')}</Text>
           </View>
@@ -251,10 +253,10 @@ const styles = StyleSheet.create({
   walletActions: { flexDirection: 'row', gap: 8, marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: Brand.border },
   walletBtn: { flex: 1, minHeight: 38, paddingHorizontal: 10, borderRadius: 15, backgroundColor: Brand.primarySoft, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 5 },
   walletBtnText: { color: Brand.primary, fontSize: 10, fontWeight: '900' },
-  overviewRow: { flexDirection: 'row', backgroundColor: Brand.ink, borderRadius: 22, overflow: 'hidden', marginBottom: 16, ...Shadow.card },
-  miniMetric: { flex: 1, paddingVertical: 12, paddingHorizontal: 6, minHeight: 72, alignItems: 'center', justifyContent: 'center', borderRightWidth: 1, borderRightColor: 'rgba(255,255,255,0.1)' },
-  miniValue: { color: '#fff', fontSize: 18, fontWeight: '900', marginTop: 4 },
-  miniLabel: { color: 'rgba(255,255,255,0.68)', fontSize: 10, fontWeight: '800', marginTop: 2, textAlign: 'center' },
+  overviewRow: { flexDirection: 'row', backgroundColor: Brand.card, borderRadius: 22, overflow: 'hidden', borderWidth: 1, borderColor: Brand.border, marginBottom: 16, ...Shadow.card },
+  miniMetric: { flex: 1, paddingVertical: 12, paddingHorizontal: 6, minHeight: 72, alignItems: 'center', justifyContent: 'center', borderRightWidth: 1, borderRightColor: Brand.border },
+  miniValue: { color: Brand.text, fontSize: 18, fontWeight: '900', marginTop: 4 },
+  miniLabel: { color: Brand.textSub, fontSize: 10, fontWeight: '800', marginTop: 2, textAlign: 'center' },
   premiumGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 16 },
   premiumCardPress: { width: '48.5%' },
   premiumCard: { height: 138, borderRadius: 24, overflow: 'hidden', backgroundColor: Brand.cardAlt, ...Shadow.card },

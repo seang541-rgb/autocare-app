@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { ImageBackground, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ImageBackground, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BrandMark } from '@/components/brand-icons';
@@ -19,7 +19,13 @@ export default function ExploreScreen() {
   const { t, categoryName, merchantHero } = useI18n();
   const initial = one(params.category) as CategoryId | undefined;
   const [categoryId, setCategoryId] = useState<CategoryId | 'all'>(initial ?? 'all');
-  const filtered = useMemo(() => (categoryId === 'all' ? merchants : merchants.filter((m) => m.categoryId === categoryId)), [categoryId]);
+  const [query, setQuery] = useState('');
+  const filtered = useMemo(() => {
+    const byCategory = categoryId === 'all' ? merchants : merchants.filter((m) => m.categoryId === categoryId);
+    const term = query.trim().toLowerCase();
+    if (!term) return byCategory;
+    return byCategory.filter((m) => [m.name, m.area, m.hero].some((value) => value.toLowerCase().includes(term)));
+  }, [categoryId, query]);
   const leadMerchant = filtered[0] ?? merchants[0];
 
   return (
@@ -37,7 +43,7 @@ export default function ExploreScreen() {
             <Text style={styles.headerTitle}>{t('exploreTitle')}</Text>
             <View style={styles.searchBar}>
               <Ionicons name="search" size={17} color={Brand.textMuted} />
-              <Text style={styles.searchText}>{t('searchPlaceholder')}</Text>
+              <TextInput value={query} onChangeText={setQuery} placeholder={t('searchPlaceholder')} placeholderTextColor={Brand.textMuted} style={styles.searchText} />
               <Ionicons name="options-outline" size={17} color={Brand.textSub} />
             </View>
           </View>

@@ -44,6 +44,7 @@ type AccountStore = {
   deleteAddress: (id: string) => void;
   setDefaultAddress: (id: string) => void;
   sendSupportMessage: (text: string, replyText?: string) => void;
+  addSupportMessage: (from: 'user' | 'ai', text: string) => void;
   addComplaintTicket: (topic: string, detail: string) => void;
   resolveComplaintTicket: (id: string) => void;
   toggleSetting: (key: keyof AccountSettings) => void;
@@ -227,6 +228,11 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         const userMessage: SupportMessage = { id: nextId('m'), from: 'user', text: trimmed, createdAt };
         const aiMessage: SupportMessage = { id: nextId('m'), from: 'ai', text: replyText ?? makeAiReply(trimmed), createdAt: createdAt + 1 };
         setSupportMessages((prev) => [...prev, userMessage, aiMessage]);
+      },
+      addSupportMessage: (from, text) => {
+        const trimmed = text.trim();
+        if (!trimmed) return;
+        setSupportMessages((prev) => [...prev, { id: nextId('m'), from, text: trimmed, createdAt: Date.now() }]);
       },
       addComplaintTicket: (topic, detail) => setComplaints((prev) => [
         { id: 'T' + (1001 + prev.length), topic: topic.trim(), detail: detail.trim(), status: 'open', createdAt: Date.now() },

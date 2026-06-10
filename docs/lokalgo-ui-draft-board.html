@@ -1,0 +1,621 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LokalGo UI Draft Board</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #dde3ec;
+      color: #101828;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      padding: 28px;
+    }
+    .board-head {
+      max-width: 1260px;
+      margin: 0 auto 22px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 18px;
+    }
+    h1 {
+      margin: 0;
+      font-size: 30px;
+      letter-spacing: 0;
+      line-height: 1.05;
+      font-weight: 950;
+    }
+    .sub {
+      margin: 8px 0 0;
+      color: #667085;
+      font-size: 14px;
+      font-weight: 750;
+    }
+    .tokens {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .token {
+      border-radius: 999px;
+      background: rgba(255,255,255,.74);
+      border: 1px solid rgba(16,24,40,.08);
+      padding: 8px 11px;
+      font-size: 12px;
+      font-weight: 900;
+      color: #475467;
+    }
+    .stage {
+      max-width: 1260px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(250px, 1fr));
+      gap: 18px;
+      align-items: start;
+    }
+    .shot-title {
+      margin: 0 0 10px;
+      font-size: 13px;
+      color: #475467;
+      font-weight: 950;
+      letter-spacing: .02em;
+      text-transform: uppercase;
+    }
+    .phone {
+      height: 760px;
+      background: #f5f7fb;
+      border-radius: 34px;
+      border: 8px solid #111827;
+      overflow: hidden;
+      box-shadow: 0 30px 80px rgba(16, 24, 40, .22);
+      position: relative;
+    }
+    .screen {
+      height: 100%;
+      overflow: hidden;
+      padding-bottom: 82px;
+      position: relative;
+    }
+    .safe {
+      height: 28px;
+      background: #0b1220;
+    }
+    .topbar {
+      padding: 12px 16px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: #f5f7fb;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+    .logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 16px;
+      background: linear-gradient(145deg, #ff8a2a, #f97316);
+      box-shadow: 0 12px 24px rgba(249,115,22,.28);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-weight: 950;
+      font-size: 13px;
+    }
+    .brand b { display: block; font-size: 21px; line-height: 1; }
+    .brand span { color: #667085; font-size: 12px; font-weight: 850; }
+    .bell, .round {
+      width: 42px;
+      height: 42px;
+      border-radius: 20px;
+      border: 1px solid #eaecf0;
+      background: #fff;
+      display: grid;
+      place-items: center;
+      font-weight: 950;
+      color: #0b1220;
+    }
+    .search {
+      margin: 0 16px 12px;
+      height: 48px;
+      border-radius: 24px;
+      background: #fff;
+      border: 1px solid #eaecf0;
+      box-shadow: 0 10px 24px rgba(16,24,40,.06);
+      display: flex;
+      align-items: center;
+      padding: 0 14px;
+      gap: 9px;
+      color: #98a2b3;
+      font-size: 13px;
+      font-weight: 850;
+    }
+    .hero {
+      margin: 0 16px 14px;
+      min-height: 142px;
+      border-radius: 28px;
+      color: #fff;
+      padding: 16px;
+      background:
+        linear-gradient(135deg, rgba(11,18,32,.1), rgba(11,18,32,.92)),
+        url("https://images.unsplash.com/photo-1606787366850-de6330128bfc?auto=format&fit=crop&w=700&q=80") center/cover;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 18px 34px rgba(16,24,40,.18);
+    }
+    .hero small, .eyebrow {
+      font-size: 11px;
+      font-weight: 950;
+      color: rgba(255,255,255,.76);
+    }
+    .hero h2 {
+      margin: 16px 0 0;
+      font-size: 24px;
+      line-height: 1.08;
+      letter-spacing: 0;
+    }
+    .content { padding: 0 16px; }
+    .shortcuts {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .shortcut {
+      min-height: 70px;
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      font-size: 10.5px;
+      font-weight: 950;
+    }
+    .ic {
+      width: 38px;
+      height: 38px;
+      border-radius: 15px;
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-weight: 950;
+      font-size: 15px;
+    }
+    .blue { background: linear-gradient(135deg, #38bdf8, #2563eb); }
+    .orange { background: linear-gradient(135deg, #fb923c, #ea580c); }
+    .green { background: linear-gradient(135deg, #34d399, #059669); }
+    .purple { background: linear-gradient(135deg, #a78bfa, #7c3aed); }
+    .wallet {
+      background: #fff;
+      border: 1px solid #eaecf0;
+      border-radius: 26px;
+      padding: 14px;
+      box-shadow: 0 12px 28px rgba(16,24,40,.08);
+      margin-bottom: 12px;
+    }
+    .wallet-row, .row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .wallet small, .muted { color: #667085; font-size: 11px; font-weight: 850; }
+    .wallet strong { display: block; margin-top: 3px; font-size: 23px; line-height: 1; }
+    .cta {
+      border: 0;
+      border-radius: 18px;
+      min-height: 48px;
+      padding: 0 14px;
+      background: linear-gradient(135deg, #ff8a2a, #f97316);
+      color: #fff;
+      font-weight: 950;
+      box-shadow: 0 12px 22px rgba(249,115,22,.25);
+    }
+    .wallet-actions {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #f0f2f5;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .mini-btn {
+      min-height: 36px;
+      border: 0;
+      border-radius: 15px;
+      background: #fff3e8;
+      color: #c2410c;
+      font-size: 10.5px;
+      font-weight: 950;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border-radius: 22px;
+      overflow: hidden;
+      background: #0b1220;
+      color: #fff;
+      margin-bottom: 15px;
+    }
+    .stat {
+      padding: 12px 6px;
+      text-align: center;
+      border-right: 1px solid rgba(255,255,255,.1);
+    }
+    .stat:last-child { border-right: 0; }
+    .stat b { display: block; font-size: 17px; }
+    .stat span { color: rgba(255,255,255,.62); font-size: 9.5px; font-weight: 850; }
+    .section {
+      margin: 0 0 10px;
+      font-size: 17px;
+      font-weight: 950;
+    }
+    .premium {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+    .pick, .merchant-card {
+      min-height: 112px;
+      border-radius: 22px;
+      padding: 11px;
+      color: #fff;
+      background:
+        linear-gradient(180deg, rgba(15,23,42,.04), rgba(15,23,42,.86)),
+        url("https://images.unsplash.com/photo-1607860108855-64acf2078ed9?auto=format&fit=crop&w=500&q=80") center/cover;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+    }
+    .pick:nth-child(2) { background-image: linear-gradient(180deg, rgba(15,23,42,.04), rgba(15,23,42,.86)), url("https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=500&q=80"); }
+    .pick:nth-child(3) { background-image: linear-gradient(180deg, rgba(15,23,42,.04), rgba(15,23,42,.86)), url("https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=500&q=80"); }
+    .pick:nth-child(4) { background-image: linear-gradient(180deg, rgba(15,23,42,.04), rgba(15,23,42,.86)), url("https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=500&q=80"); }
+    .tag {
+      align-self: flex-start;
+      border-radius: 999px;
+      padding: 5px 8px;
+      font-size: 9px;
+      font-weight: 950;
+      background: rgba(255,255,255,.2);
+    }
+    .pick b { font-size: 13px; line-height: 1.15; }
+    .tabs {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      height: 64px;
+      border-radius: 28px;
+      background: rgba(255,255,255,.96);
+      border: 1px solid rgba(234,236,240,.9);
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      align-items: center;
+      box-shadow: 0 18px 34px rgba(16,24,40,.14);
+    }
+    .tab {
+      text-align: center;
+      color: #98a2b3;
+      font-size: 9.5px;
+      font-weight: 950;
+    }
+    .tab b {
+      display: block;
+      margin: 0 auto 4px;
+      width: 24px;
+      height: 24px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+    }
+    .tab.active { color: #f97316; }
+    .tab.active b { background: #fff3e8; }
+    .page-head {
+      padding: 18px 16px 16px;
+      background: #0b1220;
+      color: #fff;
+      border-bottom-left-radius: 28px;
+      border-bottom-right-radius: 28px;
+    }
+    .page-head h2 { margin: 0; font-size: 25px; line-height: 1.1; }
+    .page-head p { margin: 6px 0 0; color: rgba(255,255,255,.68); font-size: 12px; font-weight: 800; }
+    .seg {
+      margin: 14px 16px 14px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .chip {
+      min-height: 38px;
+      border-radius: 19px;
+      background: #fff;
+      border: 1px solid #eaecf0;
+      display: grid;
+      place-items: center;
+      font-size: 10px;
+      font-weight: 950;
+      color: #667085;
+    }
+    .chip.active { background: #0b1220; color: #fff; }
+    .merchant-list { padding: 0 16px; display: grid; gap: 10px; }
+    .merchant {
+      background: #fff;
+      border-radius: 24px;
+      border: 1px solid #eaecf0;
+      padding: 10px;
+      display: grid;
+      grid-template-columns: 74px 1fr;
+      gap: 11px;
+      box-shadow: 0 10px 22px rgba(16,24,40,.055);
+    }
+    .thumb {
+      border-radius: 19px;
+      background: linear-gradient(135deg, #38bdf8, #2563eb);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 24px;
+      font-weight: 950;
+    }
+    .merchant h3, .order h3 { margin: 0 0 4px; font-size: 14px; line-height: 1.15; }
+    .merchant p, .order p { margin: 0; color: #667085; font-size: 11px; font-weight: 750; }
+    .meta { display: flex; gap: 8px; margin-top: 9px; color: #f97316; font-size: 10.5px; font-weight: 950; }
+    .order-list { padding: 16px; display: grid; gap: 12px; }
+    .order {
+      background: #fff;
+      border: 1px solid #eaecf0;
+      border-radius: 26px;
+      padding: 14px;
+      box-shadow: 0 12px 28px rgba(16,24,40,.06);
+    }
+    .status {
+      border-radius: 999px;
+      background: #fff6e6;
+      color: #b54708;
+      padding: 6px 9px;
+      font-size: 10px;
+      font-weight: 950;
+    }
+    .timeline {
+      margin: 14px 0;
+      height: 5px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #f97316 48%, #eaecf0 48%);
+    }
+    .order-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .ghost {
+      border: 0;
+      border-radius: 18px;
+      min-height: 42px;
+      background: #f5f7fb;
+      color: #475467;
+      font-weight: 950;
+    }
+    .staff-card {
+      margin: 16px;
+      border-radius: 28px;
+      padding: 16px;
+      color: #fff;
+      background: linear-gradient(135deg, #0b1220, #253044);
+      box-shadow: 0 18px 36px rgba(16,24,40,.18);
+    }
+    .staff-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .staff-stat {
+      border-radius: 18px;
+      background: rgba(255,255,255,.1);
+      padding: 10px 6px;
+      text-align: center;
+    }
+    .staff-stat b { display: block; font-size: 18px; }
+    .staff-stat span { color: rgba(255,255,255,.64); font-size: 9.5px; font-weight: 850; }
+    .scan-panel {
+      margin: 0 16px 14px;
+      background: #fff;
+      border: 1px solid #eaecf0;
+      border-radius: 26px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      box-shadow: 0 10px 22px rgba(16,24,40,.06);
+    }
+    .scan-icon {
+      width: 58px;
+      height: 58px;
+      border-radius: 22px;
+      background: linear-gradient(135deg, #ff8a2a, #f97316);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 23px;
+      font-weight: 950;
+    }
+    @media (max-width: 1180px) {
+      .stage { grid-template-columns: repeat(2, minmax(250px, 1fr)); }
+    }
+    @media (max-width: 620px) {
+      body { padding: 18px 12px; }
+      .board-head { display: block; }
+      .tokens { justify-content: flex-start; margin-top: 14px; }
+      .stage { grid-template-columns: 1fr; }
+      .phone { max-width: 390px; margin: 0 auto; }
+    }
+  </style>
+</head>
+<body>
+  <header class="board-head">
+    <div>
+      <h1>LokalGo UI Draft</h1>
+      <p class="sub">Direction: TNG-style wallet clarity + Grab-style merchant discovery.</p>
+    </div>
+    <div class="tokens">
+      <span class="token">Primary #F97316</span>
+      <span class="token">Ink #0B1220</span>
+      <span class="token">Radius 18-28</span>
+      <span class="token">4 Premium Slots</span>
+    </div>
+  </header>
+
+  <main class="stage">
+    <section>
+      <p class="shot-title">01 Home</p>
+      <div class="phone">
+        <div class="screen">
+          <div class="safe"></div>
+          <div class="topbar">
+            <div class="brand"><div class="logo">LG</div><div><b>LokalGo</b><span>Kepong, Kuala Lumpur</span></div></div>
+            <div class="bell">!</div>
+          </div>
+          <div class="search">Search food, wash, shops</div>
+          <div class="hero">
+            <small>Nearby merchants open now</small>
+            <h2>Pay, order and book local services.</h2>
+          </div>
+          <div class="content">
+            <div class="shortcuts">
+              <div class="shortcut"><div class="ic blue">C</div>Car care</div>
+              <div class="shortcut"><div class="ic orange">F</div>Food</div>
+              <div class="shortcut"><div class="ic green">R</div>Retail</div>
+              <div class="shortcut"><div class="ic purple">S</div>Services</div>
+            </div>
+            <div class="wallet">
+              <div class="wallet-row">
+                <div><small>Wallet balance</small><strong>RM 128.80</strong></div>
+                <button class="cta">Scan & pay</button>
+              </div>
+              <div class="wallet-actions">
+                <button class="mini-btn">Rewards</button>
+                <button class="mini-btn">Coupons</button>
+                <button class="mini-btn">Merchant</button>
+              </div>
+            </div>
+            <div class="stats">
+              <div class="stat"><b>4</b><span>Nearby now</span></div>
+              <div class="stat"><b>14m</b><span>Avg wait</span></div>
+              <div class="stat"><b>4.8</b><span>Top rating</span></div>
+            </div>
+            <p class="section">Premium picks</p>
+            <div class="premium">
+              <div class="pick"><span class="tag">Top merchant</span><b>SparkWash Kepong</b></div>
+              <div class="pick"><span class="tag">Top merchant</span><b>Mama Kopi Cafe</b></div>
+              <div class="pick"><span class="tag">Sponsored</span><b>SalonGo Express</b></div>
+              <div class="pick"><span class="tag">Sponsored</span><b>RetailMart</b></div>
+            </div>
+          </div>
+          <nav class="tabs">
+            <div class="tab active"><b>H</b>Home</div><div class="tab"><b>E</b>Explore</div><div class="tab"><b>O</b>Orders</div><div class="tab"><b>M</b>Merchant</div><div class="tab"><b>P</b>Me</div>
+          </nav>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <p class="shot-title">02 Explore</p>
+      <div class="phone">
+        <div class="screen">
+          <div class="safe"></div>
+          <div class="page-head">
+            <h2>Explore</h2>
+            <p>Find merchants nearby by category, queue and rating.</p>
+          </div>
+          <div class="search" style="margin-top:14px;">Search restaurant, salon, wash</div>
+          <div class="seg">
+            <div class="chip active">All</div><div class="chip">Car</div><div class="chip">Food</div><div class="chip">Retail</div>
+          </div>
+          <div class="merchant-list">
+            <div class="merchant"><div class="thumb">C</div><div><div class="row"><h3>SparkWash Kepong</h3><span class="status">Open</span></div><p>Car wash - 1.2km - 12 min wait</p><div class="meta"><span>4.8 rating</span><span>RM12+</span></div></div></div>
+            <div class="merchant"><div class="thumb orange">F</div><div><div class="row"><h3>Mama Kopi Cafe</h3><span class="status">Open</span></div><p>Pickup food - 0.8km - 9 min ready</p><div class="meta"><span>4.7 rating</span><span>RM8+</span></div></div></div>
+            <div class="merchant"><div class="thumb green">R</div><div><div class="row"><h3>RetailMart Express</h3><span class="status">Open</span></div><p>Convenience - 2.1km</p><div class="meta"><span>Deals</span><span>Pickup</span></div></div></div>
+            <div class="merchant"><div class="thumb purple">S</div><div><div class="row"><h3>SalonGo Express</h3><span class="status">Busy</span></div><p>Beauty service - 18 min wait</p><div class="meta"><span>Sponsored</span><span>RM35+</span></div></div></div>
+          </div>
+          <nav class="tabs">
+            <div class="tab"><b>H</b>Home</div><div class="tab active"><b>E</b>Explore</div><div class="tab"><b>O</b>Orders</div><div class="tab"><b>M</b>Merchant</div><div class="tab"><b>P</b>Me</div>
+          </nav>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <p class="shot-title">03 Orders</p>
+      <div class="phone">
+        <div class="screen">
+          <div class="safe"></div>
+          <div class="page-head">
+            <h2>Orders</h2>
+            <p>Active bookings and pickup progress.</p>
+          </div>
+          <div class="seg" style="grid-template-columns: repeat(2, 1fr);">
+            <div class="chip active">Active</div><div class="chip">Completed</div>
+          </div>
+          <div class="order-list">
+            <div class="order">
+              <div class="row"><div><h3>Auto wash + vacuum</h3><p>SparkWash Kepong - Today 14:30</p></div><span class="status">Arrive soon</span></div>
+              <div class="timeline"></div>
+              <div class="row"><strong>RM 18</strong><span class="muted">#LG2391</span></div>
+              <div class="order-actions" style="margin-top:12px;"><button class="ghost">Reschedule</button><button class="cta">Show QR</button></div>
+            </div>
+            <div class="order">
+              <div class="row"><div><h3>Mama Kopi pickup</h3><p>Food - Ready in 9 minutes</p></div><span class="status">Preparing</span></div>
+              <div class="timeline" style="background:linear-gradient(90deg,#f97316 68%,#eaecf0 68%);"></div>
+              <div class="row"><strong>RM 24.50</strong><span class="muted">#LG2398</span></div>
+              <div class="order-actions" style="margin-top:12px;"><button class="ghost">Contact</button><button class="cta">Track</button></div>
+            </div>
+          </div>
+          <nav class="tabs">
+            <div class="tab"><b>H</b>Home</div><div class="tab"><b>E</b>Explore</div><div class="tab active"><b>O</b>Orders</div><div class="tab"><b>M</b>Merchant</div><div class="tab"><b>P</b>Me</div>
+          </nav>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <p class="shot-title">04 Merchant</p>
+      <div class="phone">
+        <div class="screen">
+          <div class="safe"></div>
+          <div class="page-head">
+            <h2>Merchant console</h2>
+            <p>Scan redemption, manage queue and settle daily orders.</p>
+          </div>
+          <div class="staff-card">
+            <div class="row"><div><span class="eyebrow">Today overview</span><h2 style="margin:6px 0 0;">24 orders</h2></div><button class="cta">Open QR</button></div>
+            <div class="staff-grid">
+              <div class="staff-stat"><b>8</b><span>Pending</span></div>
+              <div class="staff-stat"><b>11</b><span>Preparing</span></div>
+              <div class="staff-stat"><b>5</b><span>Ready</span></div>
+            </div>
+          </div>
+          <div class="scan-panel">
+            <div class="scan-icon">QR</div>
+            <div><h3 style="margin:0 0 4px;">Scan redemption</h3><p style="margin:0;" class="muted">Verify customer QR and update order status.</p></div>
+          </div>
+          <div class="merchant-list">
+            <div class="merchant"><div class="thumb blue">W</div><div><div class="row"><h3>Wash + vacuum</h3><span class="status">Pending</span></div><p>#LG2391 - 14:30 - WXY 8888</p><div class="meta"><span>Start preparing</span></div></div></div>
+            <div class="merchant"><div class="thumb orange">F</div><div><div class="row"><h3>Kopi pickup set</h3><span class="status">Ready</span></div><p>#LG2398 - Counter pickup</p><div class="meta"><span>Mark completed</span></div></div></div>
+          </div>
+          <nav class="tabs">
+            <div class="tab"><b>H</b>Home</div><div class="tab"><b>E</b>Explore</div><div class="tab"><b>O</b>Orders</div><div class="tab active"><b>M</b>Merchant</div><div class="tab"><b>P</b>Me</div>
+          </nav>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
